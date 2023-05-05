@@ -7,6 +7,7 @@ import net.minecraft.loot.context.LootContext;
 import net.minecraft.predicate.DamagePredicate;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateSerializer;
+import net.minecraft.predicate.entity.EntityConditions;
 import net.minecraft.predicate.entity.EntityPredicate;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -18,9 +19,9 @@ public class PlayerHurtEntityCriterion extends AbstractCriterion {
       return ID;
    }
 
-   public Conditions conditionsFromJson(JsonObject jsonObject, EntityPredicate.Extended arg, AdvancementEntityPredicateDeserializer arg2) {
+   public Conditions conditionsFromJson(JsonObject jsonObject, EntityConditions arg, AdvancementEntityPredicateDeserializer arg2) {
       DamagePredicate lv = DamagePredicate.fromJson(jsonObject.get("damage"));
-      EntityPredicate.Extended lv2 = EntityPredicate.Extended.getInJson(jsonObject, "entity", arg2);
+      EntityConditions lv2 = EntityPredicate.toConditions(jsonObject, "entity", arg2);
       return new Conditions(arg, lv, lv2);
    }
 
@@ -32,42 +33,42 @@ public class PlayerHurtEntityCriterion extends AbstractCriterion {
    }
 
    // $FF: synthetic method
-   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityPredicate.Extended playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityConditions playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
       return this.conditionsFromJson(obj, playerPredicate, predicateDeserializer);
    }
 
    public static class Conditions extends AbstractCriterionConditions {
       private final DamagePredicate damage;
-      private final EntityPredicate.Extended entity;
+      private final EntityConditions entity;
 
-      public Conditions(EntityPredicate.Extended player, DamagePredicate damage, EntityPredicate.Extended entity) {
+      public Conditions(EntityConditions player, DamagePredicate damage, EntityConditions entity) {
          super(PlayerHurtEntityCriterion.ID, player);
          this.damage = damage;
          this.entity = entity;
       }
 
       public static Conditions create() {
-         return new Conditions(EntityPredicate.Extended.EMPTY, DamagePredicate.ANY, EntityPredicate.Extended.EMPTY);
+         return new Conditions(EntityConditions.EMPTY, DamagePredicate.ANY, EntityConditions.EMPTY);
       }
 
       public static Conditions create(DamagePredicate damagePredicate) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, damagePredicate, EntityPredicate.Extended.EMPTY);
+         return new Conditions(EntityConditions.EMPTY, damagePredicate, EntityConditions.EMPTY);
       }
 
       public static Conditions create(DamagePredicate.Builder damagePredicateBuilder) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, damagePredicateBuilder.build(), EntityPredicate.Extended.EMPTY);
+         return new Conditions(EntityConditions.EMPTY, damagePredicateBuilder.build(), EntityConditions.EMPTY);
       }
 
       public static Conditions create(EntityPredicate hurtEntityPredicate) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, DamagePredicate.ANY, EntityPredicate.Extended.ofLegacy(hurtEntityPredicate));
+         return new Conditions(EntityConditions.EMPTY, DamagePredicate.ANY, EntityPredicate.toConditions(hurtEntityPredicate));
       }
 
       public static Conditions create(DamagePredicate damagePredicate, EntityPredicate hurtEntityPredicate) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, damagePredicate, EntityPredicate.Extended.ofLegacy(hurtEntityPredicate));
+         return new Conditions(EntityConditions.EMPTY, damagePredicate, EntityPredicate.toConditions(hurtEntityPredicate));
       }
 
       public static Conditions create(DamagePredicate.Builder damagePredicateBuilder, EntityPredicate hurtEntityPredicate) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, damagePredicateBuilder.build(), EntityPredicate.Extended.ofLegacy(hurtEntityPredicate));
+         return new Conditions(EntityConditions.EMPTY, damagePredicateBuilder.build(), EntityPredicate.toConditions(hurtEntityPredicate));
       }
 
       public boolean matches(ServerPlayerEntity player, LootContext entityContext, DamageSource source, float dealt, float taken, boolean blocked) {

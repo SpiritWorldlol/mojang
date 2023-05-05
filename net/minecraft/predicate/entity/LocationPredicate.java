@@ -85,16 +85,14 @@ public class LocationPredicate {
             return false;
          } else if (this.feature != null && (!bl || !world.getStructureAccessor().getStructureContaining(lv, this.feature).hasChildren())) {
             return false;
-         } else if (this.smokey == null || bl && this.smokey == CampfireBlock.isLitCampfireInRange(world, lv)) {
-            if (!this.light.test(world, lv)) {
-               return false;
-            } else if (!this.block.test(world, lv)) {
-               return false;
-            } else {
-               return this.fluid.test(world, lv);
-            }
-         } else {
+         } else if (this.smokey != null && (!bl || this.smokey != CampfireBlock.isLitCampfireInRange(world, lv))) {
             return false;
+         } else if (!this.light.test(world, lv)) {
+            return false;
+         } else if (!this.block.test(world, lv)) {
+            return false;
+         } else {
+            return this.fluid.test(world, lv);
          }
       }
    }

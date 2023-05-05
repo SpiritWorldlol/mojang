@@ -149,7 +149,7 @@ public class SignText {
 
    static {
       MESSAGES_CODEC = Codecs.STRINGIFIED_TEXT.listOf().comapFlatMap((messages) -> {
-         return Util.toArray((List)messages, 4).map((list) -> {
+         return Util.decodeFixedLengthList(messages, 4).map((list) -> {
             return new Text[]{(Text)list.get(0), (Text)list.get(1), (Text)list.get(2), (Text)list.get(3)};
          });
       }, (messages) -> {

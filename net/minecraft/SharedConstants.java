@@ -16,19 +16,19 @@ public class SharedConstants {
    public static final boolean IS_DEVELOPMENT_VERSION = true;
    /** @deprecated */
    @Deprecated
-   public static final int WORLD_VERSION = 3452;
+   public static final int WORLD_VERSION = 3453;
    /** @deprecated */
    @Deprecated
    public static final String CURRENT_SERIES = "main";
    /** @deprecated */
    @Deprecated
-   public static final String VERSION_NAME = "23w17a";
+   public static final String VERSION_NAME = "23w18a";
    /** @deprecated */
    @Deprecated
    public static final int RELEASE_TARGET_PROTOCOL_VERSION = 763;
    /** @deprecated */
    @Deprecated
-   public static final int field_29736 = 132;
+   public static final int field_29736 = 133;
    public static final int SNBT_TOO_OLD_THRESHOLD = 3437;
    private static final int field_29708 = 30;
    public static final boolean CRASH_ON_UNCAUGHT_THREAD_EXCEPTION = true;
@@ -37,7 +37,7 @@ public class SharedConstants {
    public static final int RESOURCE_PACK_VERSION = 15;
    /** @deprecated */
    @Deprecated
-   public static final int DATA_PACK_VERSION = 14;
+   public static final int DATA_PACK_VERSION = 15;
    /** @deprecated */
    @Deprecated
    public static final int field_39963 = 1;
@@ -57,6 +57,7 @@ public class SharedConstants {
    public static final boolean field_29751 = false;
    public static final boolean field_29752 = false;
    public static final boolean field_29753 = false;
+   public static final boolean field_44779 = false;
    public static final boolean field_29754 = false;
    public static final boolean field_29755 = false;
    public static final boolean field_29756 = false;
@@ -121,6 +122,7 @@ public class SharedConstants {
    public static final boolean field_35652 = false;
    public static final boolean field_39961 = false;
    public static final boolean field_41533 = false;
+   public static final boolean field_44780 = false;
    public static final long field_22251;
    public static final boolean field_44583 = false;
    public static boolean useChoiceTypeRegistrations;
@@ -191,7 +193,7 @@ public class SharedConstants {
    }
 
    public static int getProtocolVersion() {
-      return 1073741956;
+      return 1073741957;
    }
 
    public static boolean isOutsideGenerationArea(ChunkPos pos) {

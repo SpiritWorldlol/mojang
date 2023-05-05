@@ -5,7 +5,7 @@ import net.minecraft.predicate.NumberRange;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateSerializer;
 import net.minecraft.predicate.entity.DistancePredicate;
-import net.minecraft.predicate.entity.EntityPredicate;
+import net.minecraft.predicate.entity.EntityConditions;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
@@ -17,7 +17,7 @@ public class LevitationCriterion extends AbstractCriterion {
       return ID;
    }
 
-   public Conditions conditionsFromJson(JsonObject jsonObject, EntityPredicate.Extended arg, AdvancementEntityPredicateDeserializer arg2) {
+   public Conditions conditionsFromJson(JsonObject jsonObject, EntityConditions arg, AdvancementEntityPredicateDeserializer arg2) {
       DistancePredicate lv = DistancePredicate.fromJson(jsonObject.get("distance"));
       NumberRange.IntRange lv2 = NumberRange.IntRange.fromJson(jsonObject.get("duration"));
       return new Conditions(arg, lv, lv2);
@@ -30,7 +30,7 @@ public class LevitationCriterion extends AbstractCriterion {
    }
 
    // $FF: synthetic method
-   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityPredicate.Extended playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityConditions playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
       return this.conditionsFromJson(obj, playerPredicate, predicateDeserializer);
    }
 
@@ -38,14 +38,14 @@ public class LevitationCriterion extends AbstractCriterion {
       private final DistancePredicate distance;
       private final NumberRange.IntRange duration;
 
-      public Conditions(EntityPredicate.Extended player, DistancePredicate distance, NumberRange.IntRange duration) {
+      public Conditions(EntityConditions player, DistancePredicate distance, NumberRange.IntRange duration) {
          super(LevitationCriterion.ID, player);
          this.distance = distance;
          this.duration = duration;
       }
 
       public static Conditions create(DistancePredicate distance) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, distance, NumberRange.IntRange.ANY);
+         return new Conditions(EntityConditions.EMPTY, distance, NumberRange.IntRange.ANY);
       }
 
       public boolean matches(ServerPlayerEntity player, Vec3d startPos, int duration) {

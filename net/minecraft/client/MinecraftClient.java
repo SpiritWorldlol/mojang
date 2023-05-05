@@ -166,7 +166,9 @@ import net.minecraft.client.util.Session;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.util.WindowProvider;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.util.telemetry.TelemetryEventProperty;
 import net.minecraft.client.util.telemetry.TelemetryManager;
+import net.minecraft.client.util.telemetry.TimeRecorder;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.datafixer.Schemas;
 import net.minecraft.entity.Entity;
@@ -461,6 +463,7 @@ public class MinecraftClient extends ReentrantThreadExecutor implements WindowEv
       this.windowProvider = new WindowProvider(this);
       this.window = this.windowProvider.createWindow(lv3, this.options.fullscreenResolution, this.getWindowTitle());
       this.onWindowFocusChanged(true);
+      TimeRecorder.INSTANCE.end(TelemetryEventProperty.LOAD_TIME_PRE_WINDOW_MS);
 
       try {
          this.window.setIcon(this.defaultResourcePack, SharedConstants.getGameVersion().isStable() ? Icons.RELEASE : Icons.SNAPSHOT);
@@ -571,6 +574,7 @@ public class MinecraftClient extends ReentrantThreadExecutor implements WindowEv
       List list = this.resourcePackManager.createResourcePacks();
       this.resourceReloadLogger.reload(ResourceReloadLogger.ReloadReason.INITIAL, list);
       ResourceReload lv6 = this.resourceManager.reload(Util.getMainWorkerExecutor(), this, COMPLETED_UNIT_FUTURE, list);
+      TimeRecorder.INSTANCE.start(TelemetryEventProperty.LOAD_TIME_LOADING_OVERLAY_MS);
       this.setOverlay(new SplashOverlay(this, lv6, (throwable) -> {
          Util.ifPresentOrElse(throwable, this::handleResourceReloadException, () -> {
             if (SharedConstants.isDevelopment) {
@@ -578,6 +582,7 @@ public class MinecraftClient extends ReentrantThreadExecutor implements WindowEv
             }
 
             this.resourceReloadLogger.finish();
+            this.collectLoadTimes();
          });
       }, false));
       this.quickPlayLogger = QuickPlayLogger.create(args.quickPlay.path());
@@ -593,6 +598,12 @@ public class MinecraftClient extends ReentrantThreadExecutor implements WindowEv
          this.onInitFinished(lv5, lv6, args.quickPlay);
       }
 
+   }
+
+   private void collectLoadTimes() {
+      TimeRecorder.INSTANCE.end(TelemetryEventProperty.LOAD_TIME_LOADING_OVERLAY_MS);
+      TimeRecorder.INSTANCE.end(TelemetryEventProperty.LOAD_TIME_TOTAL_TIME_MS);
+      TimeRecorder.INSTANCE.collect(this.telemetryManager.getSender());
    }
 
    private void onInitFinished(RealmsClient realms, ResourceReload reload, RunArgs.QuickPlay quickPlay) {

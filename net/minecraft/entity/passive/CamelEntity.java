@@ -260,7 +260,7 @@ public class CamelEntity extends AbstractHorseEntity implements JumpingMount, At
    }
 
    protected void jump(float strength, Vec3d movementInput) {
-      double d = this.getAttributeValue(EntityAttributes.HORSE_JUMP_STRENGTH) * (double)this.getJumpVelocityMultiplier() + this.getJumpBoostVelocityModifier();
+      double d = this.getAttributeValue(EntityAttributes.HORSE_JUMP_STRENGTH) * (double)this.getJumpVelocityMultiplier() + (double)this.getJumpBoostVelocityModifier();
       this.addVelocity(this.getRotationVector().multiply(1.0, 0.0, 1.0).normalize().multiply((double)(22.2222F * strength) * this.getAttributeValue(EntityAttributes.GENERIC_MOVEMENT_SPEED) * (double)this.getVelocityMultiplier()).add(0.0, (double)(1.4285F * strength) * d, 0.0));
       this.dashCooldown = 55;
       this.setDashing(true);

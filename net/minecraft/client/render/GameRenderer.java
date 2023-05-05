@@ -135,10 +135,6 @@ public class GameRenderer implements AutoCloseable {
    @Nullable
    private static ShaderProgram positionTexColorProgram;
    @Nullable
-   private static ShaderProgram blockProgram;
-   @Nullable
-   private static ShaderProgram newEntityProgram;
-   @Nullable
    private static ShaderProgram particleProgram;
    @Nullable
    private static ShaderProgram positionColorLightmapProgram;
@@ -238,6 +234,14 @@ public class GameRenderer implements AutoCloseable {
    private static ShaderProgram renderTypeLinesProgram;
    @Nullable
    private static ShaderProgram renderTypeCrumblingProgram;
+   @Nullable
+   private static ShaderProgram field_44810;
+   @Nullable
+   private static ShaderProgram field_44811;
+   @Nullable
+   private static ShaderProgram field_44812;
+   @Nullable
+   private static ShaderProgram field_44813;
 
    public GameRenderer(MinecraftClient client, HeldItemRenderer heldItemRenderer, ResourceManager resourceManager, BufferBuilderStorage buffers) {
       this.superSecretSettingIndex = SUPER_SECRET_SETTING_COUNT;
@@ -422,6 +426,7 @@ public class GameRenderer implements AutoCloseable {
             throw new RuntimeException("could not preload blit shader", var3);
          }
 
+         field_44810 = this.preloadProgram(factory, "rendertype_gui", VertexFormats.POSITION_COLOR);
          positionProgram = this.preloadProgram(factory, "position", VertexFormats.POSITION);
          positionColorProgram = this.preloadProgram(factory, "position_color", VertexFormats.POSITION_COLOR);
          positionColorTexProgram = this.preloadProgram(factory, "position_color_tex", VertexFormats.POSITION_COLOR_TEXTURE);
@@ -450,12 +455,6 @@ public class GameRenderer implements AutoCloseable {
       List list2 = Lists.newArrayListWithCapacity(this.programs.size());
 
       try {
-         list2.add(Pair.of(new ShaderProgram(factory, "block", VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL), (program) -> {
-            blockProgram = program;
-         }));
-         list2.add(Pair.of(new ShaderProgram(factory, "new_entity", VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL), (program) -> {
-            newEntityProgram = program;
-         }));
          list2.add(Pair.of(new ShaderProgram(factory, "particle", VertexFormats.POSITION_TEXTURE_COLOR_LIGHT), (program) -> {
             particleProgram = program;
          }));
@@ -620,6 +619,18 @@ public class GameRenderer implements AutoCloseable {
          }));
          list2.add(Pair.of(new ShaderProgram(factory, "rendertype_crumbling", VertexFormats.POSITION_COLOR_TEXTURE_LIGHT_NORMAL), (program) -> {
             renderTypeCrumblingProgram = program;
+         }));
+         list2.add(Pair.of(new ShaderProgram(factory, "rendertype_gui", VertexFormats.POSITION_COLOR), (arg) -> {
+            field_44810 = arg;
+         }));
+         list2.add(Pair.of(new ShaderProgram(factory, "rendertype_gui_overlay", VertexFormats.POSITION_COLOR), (arg) -> {
+            field_44811 = arg;
+         }));
+         list2.add(Pair.of(new ShaderProgram(factory, "rendertype_gui_text_highlight", VertexFormats.POSITION_COLOR), (arg) -> {
+            field_44812 = arg;
+         }));
+         list2.add(Pair.of(new ShaderProgram(factory, "rendertype_gui_ghost_recipe_overlay", VertexFormats.POSITION_COLOR), (arg) -> {
+            field_44813 = arg;
          }));
       } catch (IOException var5) {
          list2.forEach((pair) -> {
@@ -1188,8 +1199,8 @@ public class GameRenderer implements AutoCloseable {
    }
 
    private void renderNausea(DrawContext context, float distortionStrength) {
-      int i = this.client.getWindow().getScaledWidth();
-      int j = this.client.getWindow().getScaledHeight();
+      int i = context.getScaledWindowWidth();
+      int j = context.getScaledWindowHeight();
       context.getMatrices().push();
       float g = MathHelper.lerp(distortionStrength, 2.0F, 1.0F);
       context.getMatrices().translate((float)i / 2.0F, (float)j / 2.0F, 0.0F);
@@ -1259,16 +1270,6 @@ public class GameRenderer implements AutoCloseable {
    @Nullable
    public static ShaderProgram getPositionTexColorProgram() {
       return positionTexColorProgram;
-   }
-
-   @Nullable
-   public static ShaderProgram getBlockProgram() {
-      return blockProgram;
-   }
-
-   @Nullable
-   public static ShaderProgram getNewEntityProgram() {
-      return newEntityProgram;
    }
 
    @Nullable
@@ -1519,6 +1520,26 @@ public class GameRenderer implements AutoCloseable {
    @Nullable
    public static ShaderProgram getRenderTypeCrumblingProgram() {
       return renderTypeCrumblingProgram;
+   }
+
+   @Nullable
+   public static ShaderProgram method_51771() {
+      return field_44810;
+   }
+
+   @Nullable
+   public static ShaderProgram method_51772() {
+      return field_44811;
+   }
+
+   @Nullable
+   public static ShaderProgram method_51773() {
+      return field_44812;
+   }
+
+   @Nullable
+   public static ShaderProgram method_51774() {
+      return field_44813;
    }
 
    static {

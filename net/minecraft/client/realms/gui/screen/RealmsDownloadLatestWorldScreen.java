@@ -217,17 +217,12 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
    private void downloadSave() {
       (new Thread(() -> {
          try {
-            try {
-               if (!DOWNLOAD_LOCK.tryLock(1L, TimeUnit.SECONDS)) {
-                  this.status = Text.translatable("mco.download.failed");
-                  return;
-               }
+            if (!DOWNLOAD_LOCK.tryLock(1L, TimeUnit.SECONDS)) {
+               this.status = Text.translatable("mco.download.failed");
+               return;
+            }
 
-               if (this.cancelled) {
-                  this.downloadCancelled();
-                  return;
-               }
-
+            if (!this.cancelled) {
                this.status = Text.translatable("mco.download.downloading", this.worldName);
                FileDownload lv = new FileDownload();
                lv.contentLength(this.worldDownload.downloadLink);
@@ -266,22 +261,26 @@ public class RealmsDownloadLatestWorldScreen extends RealmsScreen {
                this.status = Text.translatable("mco.download.done");
                this.cancelButton.setMessage(ScreenTexts.DONE);
                return;
-            } catch (InterruptedException var9) {
-               LOGGER.error("Could not acquire upload lock");
-            } catch (Exception var10) {
-               this.downloadError = Text.translatable("mco.download.failed");
-               var10.printStackTrace();
             }
 
+            this.downloadCancelled();
+         } catch (InterruptedException var9) {
+            LOGGER.error("Could not acquire upload lock");
+            return;
+         } catch (Exception var10) {
+            this.downloadError = Text.translatable("mco.download.failed");
+            var10.printStackTrace();
+            return;
          } finally {
             if (!DOWNLOAD_LOCK.isHeldByCurrentThread()) {
                return;
-            } else {
-               DOWNLOAD_LOCK.unlock();
-               this.showDots = false;
-               this.finished = true;
             }
+
+            DOWNLOAD_LOCK.unlock();
+            this.showDots = false;
+            this.finished = true;
          }
+
       })).start();
    }
 

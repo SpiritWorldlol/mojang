@@ -240,7 +240,7 @@ public class BlockBox {
 
    static {
       CODEC = Codec.INT_STREAM.comapFlatMap((values) -> {
-         return Util.toArray((IntStream)values, 6).map((array) -> {
+         return Util.decodeFixedLengthArray(values, 6).map((array) -> {
             return new BlockBox(array[0], array[1], array[2], array[3], array[4], array[5]);
          });
       }, (box) -> {

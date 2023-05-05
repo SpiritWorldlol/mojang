@@ -5,7 +5,7 @@ import com.google.gson.JsonSyntaxException;
 import net.minecraft.potion.Potion;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateSerializer;
-import net.minecraft.predicate.entity.EntityPredicate;
+import net.minecraft.predicate.entity.EntityConditions;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -19,7 +19,7 @@ public class BrewedPotionCriterion extends AbstractCriterion {
       return ID;
    }
 
-   public Conditions conditionsFromJson(JsonObject jsonObject, EntityPredicate.Extended arg, AdvancementEntityPredicateDeserializer arg2) {
+   public Conditions conditionsFromJson(JsonObject jsonObject, EntityConditions arg, AdvancementEntityPredicateDeserializer arg2) {
       Potion lv = null;
       if (jsonObject.has("potion")) {
          Identifier lv2 = new Identifier(JsonHelper.getString(jsonObject, "potion"));
@@ -38,7 +38,7 @@ public class BrewedPotionCriterion extends AbstractCriterion {
    }
 
    // $FF: synthetic method
-   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityPredicate.Extended playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityConditions playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
       return this.conditionsFromJson(obj, playerPredicate, predicateDeserializer);
    }
 
@@ -46,13 +46,13 @@ public class BrewedPotionCriterion extends AbstractCriterion {
       @Nullable
       private final Potion potion;
 
-      public Conditions(EntityPredicate.Extended player, @Nullable Potion potion) {
+      public Conditions(EntityConditions player, @Nullable Potion potion) {
          super(BrewedPotionCriterion.ID, player);
          this.potion = potion;
       }
 
       public static Conditions any() {
-         return new Conditions(EntityPredicate.Extended.EMPTY, (Potion)null);
+         return new Conditions(EntityConditions.EMPTY, (Potion)null);
       }
 
       public boolean matches(Potion potion) {

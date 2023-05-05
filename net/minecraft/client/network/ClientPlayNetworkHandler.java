@@ -365,7 +365,7 @@ public class ClientPlayNetworkHandler implements TickablePacketListener, ClientP
       this.connection = connection;
       this.serverInfo = serverInfo;
       this.profile = profile;
-      this.advancementHandler = new ClientAdvancementManager(client);
+      this.advancementHandler = new ClientAdvancementManager(client, worldSession);
       this.commandSource = new ClientCommandSource(this, client);
       this.worldSession = worldSession;
    }
@@ -678,8 +678,18 @@ public class ClientPlayNetworkHandler implements TickablePacketListener, ClientP
 
    public void onChunkData(ChunkDataS2CPacket packet) {
       NetworkThreadUtils.forceMainThread(packet, this, (ThreadExecutor)this.client);
-      this.loadChunk(packet.getX(), packet.getZ(), packet.getChunkData());
-      this.updateChunk(packet.getX(), packet.getZ(), packet.getLightData());
+      int i = packet.getX();
+      int j = packet.getZ();
+      this.loadChunk(i, j, packet.getChunkData());
+      LightData lv = packet.getLightData();
+      this.world.enqueueChunkUpdate(() -> {
+         this.readLightData(i, j, lv);
+         WorldChunk lvx = this.world.getChunkManager().getWorldChunk(i, j, false);
+         if (lvx != null) {
+            this.scheduleRenderChunk(lvx, i, j);
+         }
+
+      });
    }
 
    public void onChunkBiomeData(ChunkBiomeDataS2CPacket packet) {
@@ -719,17 +729,6 @@ public class ClientPlayNetworkHandler implements TickablePacketListener, ClientP
       this.world.getChunkManager().loadChunkFromPacket(x, z, chunkData.getSectionsDataBuf(), chunkData.getHeightmap(), chunkData.getBlockEntities(x, z));
    }
 
-   private void updateChunk(int x, int z, LightData lightData) {
-      this.world.enqueueChunkUpdate(() -> {
-         this.readLightData(x, z, lightData);
-         WorldChunk lv = this.world.getChunkManager().getWorldChunk(x, z, false);
-         if (lv != null) {
-            this.scheduleRenderChunk(lv, x, z);
-         }
-
-      });
-   }
-
    private void scheduleRenderChunk(WorldChunk chunk, int x, int z) {
       LightingProvider lv = this.world.getChunkManager().getLightingProvider();
       ChunkSection[] lvs = chunk.getSectionArray();
@@ -754,12 +753,20 @@ public class ClientPlayNetworkHandler implements TickablePacketListener, ClientP
    }
 
    private void unloadChunk(UnloadChunkS2CPacket packet) {
+      ChunkPos lv = new ChunkPos(packet.getX(), packet.getZ());
       this.world.enqueueChunkUpdate(() -> {
-         LightingProvider lv = this.world.getLightingProvider();
-         lv.setColumnEnabled(new ChunkPos(packet.getX(), packet.getZ()), false);
+         LightingProvider lvx = this.world.getLightingProvider();
+         lvx.setColumnEnabled(lv, false);
 
-         for(int i = this.world.getBottomSectionCoord(); i < this.world.getTopSectionCoord(); ++i) {
-            lv.setSectionStatus(ChunkSectionPos.from(packet.getX(), i, packet.getZ()), true);
+         int i;
+         for(i = lvx.getBottomY(); i < lvx.getTopY(); ++i) {
+            ChunkSectionPos lv2 = ChunkSectionPos.from(lv, i);
+            lvx.enqueueSectionData(LightType.BLOCK, lv2, (ChunkNibbleArray)null);
+            lvx.enqueueSectionData(LightType.SKY, lv2, (ChunkNibbleArray)null);
+         }
+
+         for(i = this.world.getBottomSectionCoord(); i < this.world.getTopSectionCoord(); ++i) {
+            lvx.setSectionStatus(ChunkSectionPos.from(lv, i), true);
          }
 
       });

@@ -11,6 +11,7 @@ import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateSerializer;
+import net.minecraft.predicate.entity.EntityConditions;
 import net.minecraft.predicate.entity.EntityPredicate;
 import net.minecraft.predicate.item.ItemPredicate;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -23,9 +24,9 @@ public class FishingRodHookedCriterion extends AbstractCriterion {
       return ID;
    }
 
-   public Conditions conditionsFromJson(JsonObject jsonObject, EntityPredicate.Extended arg, AdvancementEntityPredicateDeserializer arg2) {
+   public Conditions conditionsFromJson(JsonObject jsonObject, EntityConditions arg, AdvancementEntityPredicateDeserializer arg2) {
       ItemPredicate lv = ItemPredicate.fromJson(jsonObject.get("rod"));
-      EntityPredicate.Extended lv2 = EntityPredicate.Extended.getInJson(jsonObject, "entity", arg2);
+      EntityConditions lv2 = EntityPredicate.toConditions(jsonObject, "entity", arg2);
       ItemPredicate lv3 = ItemPredicate.fromJson(jsonObject.get("item"));
       return new Conditions(arg, lv, lv2, lv3);
    }
@@ -38,16 +39,16 @@ public class FishingRodHookedCriterion extends AbstractCriterion {
    }
 
    // $FF: synthetic method
-   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityPredicate.Extended playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityConditions playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
       return this.conditionsFromJson(obj, playerPredicate, predicateDeserializer);
    }
 
    public static class Conditions extends AbstractCriterionConditions {
       private final ItemPredicate rod;
-      private final EntityPredicate.Extended hookedEntity;
+      private final EntityConditions hookedEntity;
       private final ItemPredicate caughtItem;
 
-      public Conditions(EntityPredicate.Extended player, ItemPredicate rod, EntityPredicate.Extended hookedEntity, ItemPredicate caughtItem) {
+      public Conditions(EntityConditions player, ItemPredicate rod, EntityConditions hookedEntity, ItemPredicate caughtItem) {
          super(FishingRodHookedCriterion.ID, player);
          this.rod = rod;
          this.hookedEntity = hookedEntity;
@@ -55,7 +56,7 @@ public class FishingRodHookedCriterion extends AbstractCriterion {
       }
 
       public static Conditions create(ItemPredicate rod, EntityPredicate bobber, ItemPredicate item) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, rod, EntityPredicate.Extended.ofLegacy(bobber), item);
+         return new Conditions(EntityConditions.EMPTY, rod, EntityPredicate.toConditions(bobber), item);
       }
 
       public boolean matches(ItemStack rod, LootContext hookedEntityContext, Collection fishingLoots) {

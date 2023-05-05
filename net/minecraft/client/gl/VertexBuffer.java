@@ -16,6 +16,7 @@ import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class VertexBuffer implements AutoCloseable {
+   private final class_8555 field_44792;
    private int vertexBufferId;
    private int indexBufferId;
    private int vertexArrayId;
@@ -27,7 +28,8 @@ public class VertexBuffer implements AutoCloseable {
    private int indexCount;
    private VertexFormat.DrawMode drawMode;
 
-   public VertexBuffer() {
+   public VertexBuffer(class_8555 arg) {
+      this.field_44792 = arg;
       RenderSystem.assertOnRenderThread();
       this.vertexBufferId = GlStateManager._glGenBuffers();
       this.indexBufferId = GlStateManager._glGenBuffers();
@@ -69,7 +71,7 @@ public class VertexBuffer implements AutoCloseable {
             GlStateManager._glBindBuffer(GlConst.GL_ARRAY_BUFFER, this.vertexBufferId);
          }
 
-         RenderSystem.glBufferData(GlConst.GL_ARRAY_BUFFER, vertexBuffer, GlConst.GL_STATIC_DRAW);
+         RenderSystem.glBufferData(GlConst.GL_ARRAY_BUFFER, vertexBuffer, this.field_44792.field_44795);
       }
 
       return parameters.format();
@@ -79,7 +81,7 @@ public class VertexBuffer implements AutoCloseable {
    private RenderSystem.ShapeIndexBuffer uploadIndexBuffer(BufferBuilder.DrawParameters parameters, ByteBuffer indexBuffer) {
       if (!parameters.sequentialIndex()) {
          GlStateManager._glBindBuffer(GlConst.GL_ELEMENT_ARRAY_BUFFER, this.indexBufferId);
-         RenderSystem.glBufferData(GlConst.GL_ELEMENT_ARRAY_BUFFER, indexBuffer, GlConst.GL_STATIC_DRAW);
+         RenderSystem.glBufferData(GlConst.GL_ELEMENT_ARRAY_BUFFER, indexBuffer, this.field_44792.field_44795);
          return null;
       } else {
          RenderSystem.ShapeIndexBuffer lv = RenderSystem.getSequentialBuffer(parameters.mode());
@@ -210,5 +212,22 @@ public class VertexBuffer implements AutoCloseable {
 
    public boolean isClosed() {
       return this.vertexArrayId == -1;
+   }
+
+   @Environment(EnvType.CLIENT)
+   public static enum class_8555 {
+      STATIC(35044),
+      DYNAMIC(35048);
+
+      final int field_44795;
+
+      private class_8555(int j) {
+         this.field_44795 = j;
+      }
+
+      // $FF: synthetic method
+      private static class_8555[] method_51735() {
+         return new class_8555[]{STATIC, DYNAMIC};
+      }
    }
 }

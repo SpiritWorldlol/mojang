@@ -14,8 +14,12 @@ public interface LootCondition extends LootContextAware, Predicate {
          return InvertedLootCondition.builder(this);
       }
 
-      default AlternativeLootCondition.Builder or(Builder condition) {
-         return AlternativeLootCondition.builder(this, condition);
+      default AnyOfLootCondition.Builder or(Builder condition) {
+         return AnyOfLootCondition.builder(this, condition);
+      }
+
+      default AllOfLootCondition.Builder and(Builder condition) {
+         return AllOfLootCondition.builder(this, condition);
       }
    }
 }

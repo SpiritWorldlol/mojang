@@ -105,19 +105,19 @@ public class RealmsGetServerDetailsTask extends LongRunningTask {
    private RealmsLongConfirmationScreen createResourcePackConfirmationScreen(RealmsServerAddress address, Function connectingScreenCreator) {
       BooleanConsumer booleanConsumer = (confirmed) -> {
          try {
-            if (confirmed) {
-               this.downloadResourcePack(address).thenRun(() -> {
-                  setScreen((Screen)connectingScreenCreator.apply(address));
-               }).exceptionally((throwable) -> {
-                  MinecraftClient.getInstance().getServerResourcePackProvider().clear();
-                  LOGGER.error("Failed to download resource pack from {}", address, throwable);
-                  setScreen(new RealmsGenericErrorScreen(Text.literal("Failed to download resource pack!"), this.lastScreen));
-                  return null;
-               });
+            if (!confirmed) {
+               setScreen(this.lastScreen);
                return;
             }
 
-            setScreen(this.lastScreen);
+            this.downloadResourcePack(address).thenRun(() -> {
+               setScreen((Screen)connectingScreenCreator.apply(address));
+            }).exceptionally((throwable) -> {
+               MinecraftClient.getInstance().getServerResourcePackProvider().clear();
+               LOGGER.error("Failed to download resource pack from {}", address, throwable);
+               setScreen(new RealmsGenericErrorScreen(Text.literal("Failed to download resource pack!"), this.lastScreen));
+               return null;
+            });
          } finally {
             if (this.connectLock.isHeldByCurrentThread()) {
                this.connectLock.unlock();

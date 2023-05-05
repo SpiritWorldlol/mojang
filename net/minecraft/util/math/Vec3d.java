@@ -260,7 +260,7 @@ public class Vec3d implements Position {
 
    static {
       CODEC = Codec.DOUBLE.listOf().comapFlatMap((coordinates) -> {
-         return Util.toArray((List)coordinates, 3).map((coords) -> {
+         return Util.decodeFixedLengthList(coordinates, 3).map((coords) -> {
             return new Vec3d((Double)coords.get(0), (Double)coords.get(1), (Double)coords.get(2));
          });
       }, (vec) -> {

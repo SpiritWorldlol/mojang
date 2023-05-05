@@ -6,6 +6,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateSerializer;
+import net.minecraft.predicate.entity.EntityConditions;
 import net.minecraft.predicate.entity.EntityEffectPredicate;
 import net.minecraft.predicate.entity.EntityPredicate;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -19,9 +20,9 @@ public class EffectsChangedCriterion extends AbstractCriterion {
       return ID;
    }
 
-   public Conditions conditionsFromJson(JsonObject jsonObject, EntityPredicate.Extended arg, AdvancementEntityPredicateDeserializer arg2) {
+   public Conditions conditionsFromJson(JsonObject jsonObject, EntityConditions arg, AdvancementEntityPredicateDeserializer arg2) {
       EntityEffectPredicate lv = EntityEffectPredicate.fromJson(jsonObject.get("effects"));
-      EntityPredicate.Extended lv2 = EntityPredicate.Extended.getInJson(jsonObject, "source", arg2);
+      EntityConditions lv2 = EntityPredicate.toConditions(jsonObject, "source", arg2);
       return new Conditions(arg, lv, lv2);
    }
 
@@ -33,33 +34,33 @@ public class EffectsChangedCriterion extends AbstractCriterion {
    }
 
    // $FF: synthetic method
-   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityPredicate.Extended playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityConditions playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
       return this.conditionsFromJson(obj, playerPredicate, predicateDeserializer);
    }
 
    public static class Conditions extends AbstractCriterionConditions {
       private final EntityEffectPredicate effects;
-      private final EntityPredicate.Extended source;
+      private final EntityConditions source;
 
-      public Conditions(EntityPredicate.Extended player, EntityEffectPredicate effects, EntityPredicate.Extended source) {
+      public Conditions(EntityConditions player, EntityEffectPredicate effects, EntityConditions source) {
          super(EffectsChangedCriterion.ID, player);
          this.effects = effects;
          this.source = source;
       }
 
       public static Conditions create(EntityEffectPredicate effects) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, effects, EntityPredicate.Extended.EMPTY);
+         return new Conditions(EntityConditions.EMPTY, effects, EntityConditions.EMPTY);
       }
 
       public static Conditions create(EntityPredicate source) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, EntityEffectPredicate.EMPTY, EntityPredicate.Extended.ofLegacy(source));
+         return new Conditions(EntityConditions.EMPTY, EntityEffectPredicate.EMPTY, EntityPredicate.toConditions(source));
       }
 
       public boolean matches(ServerPlayerEntity player, @Nullable LootContext context) {
          if (!this.effects.test((LivingEntity)player)) {
             return false;
          } else {
-            return this.source == EntityPredicate.Extended.EMPTY || context != null && this.source.test(context);
+            return this.source == EntityConditions.EMPTY || context != null && this.source.test(context);
          }
       }
 

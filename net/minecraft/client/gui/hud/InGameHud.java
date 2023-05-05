@@ -24,6 +24,7 @@ import net.minecraft.client.option.AttackIndicator;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.LightmapTextureManager;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.texture.StatusEffectSpriteManager;
@@ -143,8 +144,8 @@ public class InGameHud {
 
    public void render(DrawContext context, float tickDelta) {
       Window lv = this.client.getWindow();
-      this.scaledWidth = lv.getScaledWidth();
-      this.scaledHeight = lv.getScaledHeight();
+      this.scaledWidth = context.getScaledWindowWidth();
+      this.scaledHeight = context.getScaledWindowHeight();
       TextRenderer lv2 = this.getTextRenderer();
       RenderSystem.enableBlend();
       if (MinecraftClient.isFancyGraphicsOrBetter()) {
@@ -213,7 +214,6 @@ public class InGameHud {
       float j;
       if (this.client.player.getSleepTimer() > 0) {
          this.client.getProfiler().push("sleep");
-         RenderSystem.disableDepthTest();
          j = (float)this.client.player.getSleepTimer();
          float k = j / 100.0F;
          if (k > 1.0F) {
@@ -221,8 +221,7 @@ public class InGameHud {
          }
 
          l = (int)(220.0F * k) << 24 | 1052704;
-         context.fill(0, 0, this.scaledWidth, this.scaledHeight, l);
-         RenderSystem.enableDepthTest();
+         context.method_51739(RenderLayer.method_51785(), 0, 0, this.scaledWidth, this.scaledHeight, l);
          this.client.getProfiler().pop();
       }
 
@@ -963,8 +962,6 @@ public class InGameHud {
    }
 
    private void renderSpyglassOverlay(DrawContext context, float scale) {
-      RenderSystem.disableDepthTest();
-      RenderSystem.depthMask(false);
       float g = (float)Math.min(this.scaledWidth, this.scaledHeight);
       float i = Math.min((float)this.scaledWidth / g, (float)this.scaledHeight / g) * scale;
       int j = MathHelper.floor(g * i);
@@ -974,12 +971,10 @@ public class InGameHud {
       int n = l + j;
       int o = m + k;
       context.drawTexture(SPYGLASS_SCOPE, l, m, -90, 0.0F, 0.0F, j, k, j, k);
-      context.fill(0, o, this.scaledWidth, this.scaledHeight, -90, -16777216);
-      context.fill(0, 0, this.scaledWidth, m, -90, -16777216);
-      context.fill(0, m, l, o, -90, -16777216);
-      context.fill(n, m, this.scaledWidth, o, -90, -16777216);
-      RenderSystem.depthMask(true);
-      RenderSystem.enableDepthTest();
+      context.fill(RenderLayer.method_51785(), 0, o, this.scaledWidth, this.scaledHeight, -90, -16777216);
+      context.fill(RenderLayer.method_51785(), 0, 0, this.scaledWidth, m, -90, -16777216);
+      context.fill(RenderLayer.method_51785(), 0, m, l, o, -90, -16777216);
+      context.fill(RenderLayer.method_51785(), n, m, this.scaledWidth, o, -90, -16777216);
    }
 
    private void updateVignetteDarkness(Entity entity) {

@@ -1,11 +1,21 @@
 package net.minecraft.advancement.criterion;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import java.util.Arrays;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.condition.BlockStatePropertyLootCondition;
+import net.minecraft.loot.condition.LocationCheckLootCondition;
+import net.minecraft.loot.condition.LootCondition;
+import net.minecraft.loot.condition.MatchToolLootCondition;
+import net.minecraft.loot.context.LootContext;
+import net.minecraft.loot.context.LootContextParameters;
+import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateSerializer;
-import net.minecraft.predicate.entity.EntityPredicate;
+import net.minecraft.predicate.entity.EntityConditions;
 import net.minecraft.predicate.entity.LocationPredicate;
 import net.minecraft.predicate.item.ItemPredicate;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -24,50 +34,69 @@ public class ItemCriterion extends AbstractCriterion {
       return this.id;
    }
 
-   public Conditions conditionsFromJson(JsonObject jsonObject, EntityPredicate.Extended arg, AdvancementEntityPredicateDeserializer arg2) {
-      LocationPredicate lv = LocationPredicate.fromJson(jsonObject.get("location"));
-      ItemPredicate lv2 = ItemPredicate.fromJson(jsonObject.get("item"));
-      return new Conditions(this.id, arg, lv, lv2);
+   public Conditions conditionsFromJson(JsonObject jsonObject, EntityConditions arg, AdvancementEntityPredicateDeserializer arg2) {
+      EntityConditions lv = EntityConditions.fromJson("location", arg2, jsonObject.get("location"), LootContextTypes.ADVANCEMENT_LOCATION);
+      if (lv == null) {
+         throw new JsonParseException("Failed to parse 'location' field");
+      } else {
+         return new Conditions(this.id, arg, lv);
+      }
    }
 
    public void trigger(ServerPlayerEntity player, BlockPos pos, ItemStack stack) {
-      BlockState lv = player.getWorld().getBlockState(pos);
+      ServerWorld lv = player.getServerWorld();
+      BlockState lv2 = lv.getBlockState(pos);
+      LootContext lv3 = (new LootContext.Builder(lv)).parameter(LootContextParameters.ORIGIN, pos.toCenterPos()).parameter(LootContextParameters.THIS_ENTITY, player).parameter(LootContextParameters.BLOCK_STATE, lv2).parameter(LootContextParameters.TOOL, stack).build(LootContextTypes.ADVANCEMENT_LOCATION);
       this.trigger(player, (conditions) -> {
-         return conditions.test(lv, player.getServerWorld(), pos, stack);
+         return conditions.testLocation(lv3);
       });
    }
 
    // $FF: synthetic method
-   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityPredicate.Extended playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityConditions playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
       return this.conditionsFromJson(obj, playerPredicate, predicateDeserializer);
    }
 
    public static class Conditions extends AbstractCriterionConditions {
-      private final LocationPredicate location;
-      private final ItemPredicate item;
+      private final EntityConditions location;
 
-      public Conditions(Identifier id, EntityPredicate.Extended entity, LocationPredicate location, ItemPredicate item) {
+      public Conditions(Identifier id, EntityConditions entity, EntityConditions location) {
          super(id, entity);
          this.location = location;
-         this.item = item;
+      }
+
+      public static Conditions createPlacedBlock(Block block) {
+         EntityConditions lv = EntityConditions.create(BlockStatePropertyLootCondition.builder(block).build());
+         return new Conditions(Criteria.PLACED_BLOCK.id, EntityConditions.EMPTY, lv);
+      }
+
+      public static Conditions createPlacedBlock(LootCondition.Builder... location) {
+         EntityConditions lv = EntityConditions.create((LootCondition[])Arrays.stream(location).map(LootCondition.Builder::build).toArray((i) -> {
+            return new LootCondition[i];
+         }));
+         return new Conditions(Criteria.PLACED_BLOCK.id, EntityConditions.EMPTY, lv);
+      }
+
+      private static Conditions create(LocationPredicate.Builder location, ItemPredicate.Builder tool, Identifier id) {
+         EntityConditions lv = EntityConditions.create(LocationCheckLootCondition.builder(location).build(), MatchToolLootCondition.builder(tool).build());
+         return new Conditions(id, EntityConditions.EMPTY, lv);
       }
 
       public static Conditions create(LocationPredicate.Builder location, ItemPredicate.Builder item) {
-         return new Conditions(Criteria.ITEM_USED_ON_BLOCK.id, EntityPredicate.Extended.EMPTY, location.build(), item.build());
+         return create(location, item, Criteria.ITEM_USED_ON_BLOCK.id);
       }
 
       public static Conditions createAllayDropItemOnBlock(LocationPredicate.Builder location, ItemPredicate.Builder item) {
-         return new Conditions(Criteria.ALLAY_DROP_ITEM_ON_BLOCK.id, EntityPredicate.Extended.EMPTY, location.build(), item.build());
+         return create(location, item, Criteria.ALLAY_DROP_ITEM_ON_BLOCK.id);
       }
 
-      public boolean test(BlockState state, ServerWorld world, BlockPos pos, ItemStack stack) {
-         return !this.location.test(world, (double)pos.getX() + 0.5, (double)pos.getY() + 0.5, (double)pos.getZ() + 0.5) ? false : this.item.test(stack);
+      public boolean testLocation(LootContext context) {
+         return this.location.test(context);
       }
 
       public JsonObject toJson(AdvancementEntityPredicateSerializer predicateSerializer) {
          JsonObject jsonObject = super.toJson(predicateSerializer);
-         jsonObject.add("location", this.location.toJson());
-         jsonObject.add("item", this.item.toJson());
+         jsonObject.add("location", this.location.toJson(predicateSerializer));
          return jsonObject;
       }
    }

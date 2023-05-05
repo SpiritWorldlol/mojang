@@ -149,22 +149,24 @@ public class ServerResourcePackProvider implements ResourcePackProvider {
    public CompletableFuture clear() {
       this.lock.lock();
 
+      CompletableFuture var1;
       try {
          if (this.downloadTask != null) {
             this.downloadTask.cancel(true);
          }
 
          this.downloadTask = null;
-         if (this.serverContainer != null) {
-            this.serverContainer = null;
-            CompletableFuture var1 = MinecraftClient.getInstance().reloadResourcesConcurrently();
-            return var1;
+         if (this.serverContainer == null) {
+            return CompletableFuture.completedFuture((Object)null);
          }
+
+         this.serverContainer = null;
+         var1 = MinecraftClient.getInstance().reloadResourcesConcurrently();
       } finally {
          this.lock.unlock();
       }
 
-      return CompletableFuture.completedFuture((Object)null);
+      return var1;
    }
 
    private boolean verifyFile(String expectedSha1, File file) {

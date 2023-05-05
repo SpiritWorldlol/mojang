@@ -49,7 +49,7 @@ public class ServerLightingProvider extends LightingProvider implements AutoClos
 
    public void checkBlock(BlockPos pos) {
       BlockPos lv = pos.toImmutable();
-      this.enqueue(ChunkSectionPos.getSectionCoord(pos.getX()), ChunkSectionPos.getSectionCoord(pos.getZ()), ServerLightingProvider.Stage.POST_UPDATE, Util.debugRunnable(() -> {
+      this.enqueue(ChunkSectionPos.getSectionCoord(pos.getX()), ChunkSectionPos.getSectionCoord(pos.getZ()), ServerLightingProvider.Stage.PRE_UPDATE, Util.debugRunnable(() -> {
          super.checkBlock(lv);
       }, () -> {
          return "checkBlock " + lv;

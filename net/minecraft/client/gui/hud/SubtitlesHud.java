@@ -76,7 +76,7 @@ public class SubtitlesHud implements SoundInstanceListener {
             int p = MathHelper.floor(MathHelper.clampedLerp(255.0F, 75.0F, (float)(Util.getMeasuringTimeMs() - lv5.getTime()) / (float)(3000.0 * d)));
             int q = p << 16 | p << 8 | p;
             context.getMatrices().push();
-            context.getMatrices().translate((float)this.client.getWindow().getScaledWidth() - (float)l * 1.0F - 2.0F, (float)(this.client.getWindow().getScaledHeight() - 35) - (float)(i * (m + 1)) * 1.0F, 0.0F);
+            context.getMatrices().translate((float)context.getScaledWindowWidth() - (float)l * 1.0F - 2.0F, (float)(context.getScaledWindowHeight() - 35) - (float)(i * (m + 1)) * 1.0F, 0.0F);
             context.getMatrices().scale(1.0F, 1.0F, 1.0F);
             context.fill(-l - 1, -n - 1, l + 1, n + 1, this.client.options.getTextBackgroundColor(0.8F));
             int r = q + -16777216;

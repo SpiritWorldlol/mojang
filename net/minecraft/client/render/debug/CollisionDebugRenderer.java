@@ -39,7 +39,7 @@ public class CollisionDebugRenderer implements DebugRenderer.Renderer {
 
       while(var12.hasNext()) {
          VoxelShape lv3 = (VoxelShape)var12.next();
-         WorldRenderer.drawShapeOutline(matrices, lv2, lv3, -cameraX, -cameraY, -cameraZ, 1.0F, 1.0F, 1.0F, 1.0F);
+         WorldRenderer.drawShapeOutline(matrices, lv2, lv3, -cameraX, -cameraY, -cameraZ, 1.0F, 1.0F, 1.0F, 1.0F, true);
       }
 
    }

@@ -1,5 +1,6 @@
 package net.minecraft.client.util.telemetry;
 
+import com.google.common.base.Suppliers;
 import com.mojang.authlib.minecraft.TelemetrySession;
 import com.mojang.authlib.minecraft.UserApiService;
 import java.nio.file.Path;
@@ -12,6 +13,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.SharedConstants;
@@ -32,6 +34,7 @@ public class TelemetryManager implements AutoCloseable {
    private final PropertyMap propertyMap;
    private final Path logDirectory;
    private final CompletableFuture logManager;
+   private final Supplier lazySender = Suppliers.memoize(this::computeSender);
 
    public TelemetryManager(MinecraftClient client, UserApiService userApiService, Session session) {
       this.userApiService = userApiService;
@@ -47,16 +50,21 @@ public class TelemetryManager implements AutoCloseable {
       lv.put(TelemetryEventProperty.OPERATING_SYSTEM, Util.getOperatingSystem().getName());
       lv.put(TelemetryEventProperty.PLATFORM, System.getProperty("os.name"));
       lv.put(TelemetryEventProperty.CLIENT_MODDED, MinecraftClient.getModStatus().isModded());
+      lv.putIfNonNull(TelemetryEventProperty.LAUNCHER_NAME, System.getProperty("minecraft.launcher.brand"));
       this.propertyMap = lv.build();
       this.logDirectory = client.runDirectory.toPath().resolve("logs/telemetry");
       this.logManager = TelemetryLogManager.create(this.logDirectory);
    }
 
-   public WorldSession createWorldSession(boolean newWorld, @Nullable Duration worldLoadTime) {
-      return new WorldSession(this.getSender(), newWorld, worldLoadTime);
+   public WorldSession createWorldSession(boolean newWorld, @Nullable Duration worldLoadTime, @Nullable String realmsMinigameName) {
+      return new WorldSession(this.computeSender(), newWorld, worldLoadTime, realmsMinigameName);
    }
 
-   private TelemetrySender getSender() {
+   public TelemetrySender getSender() {
+      return (TelemetrySender)this.lazySender.get();
+   }
+
+   private TelemetrySender computeSender() {
       if (SharedConstants.isDevelopment) {
          return TelemetrySender.NOOP;
       } else {
@@ -69,14 +77,14 @@ public class TelemetryManager implements AutoCloseable {
                   return CompletableFuture.completedFuture(Optional.empty());
                });
             });
-            return (arg, consumer) -> {
-               if (!arg.isOptional() || MinecraftClient.getInstance().isOptionalTelemetryEnabled()) {
+            return (eventType, adder) -> {
+               if (!eventType.isOptional() || MinecraftClient.getInstance().isOptionalTelemetryEnabled()) {
                   PropertyMap.Builder lv = PropertyMap.builder();
                   lv.putAll(this.propertyMap);
                   lv.put(TelemetryEventProperty.EVENT_TIMESTAMP_UTC, Instant.now());
-                  lv.put(TelemetryEventProperty.OPT_IN, arg.isOptional());
-                  consumer.accept(lv);
-                  SentTelemetryEvent lv2 = new SentTelemetryEvent(arg, lv.build());
+                  lv.put(TelemetryEventProperty.OPT_IN, eventType.isOptional());
+                  adder.accept(lv);
+                  SentTelemetryEvent lv2 = new SentTelemetryEvent(eventType, lv.build());
                   completableFuture.thenAccept((logger) -> {
                      if (!logger.isEmpty()) {
                         ((TelemetryLogger)logger.get()).log(lv2);

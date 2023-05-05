@@ -1065,6 +1065,7 @@ public class ItemGroups {
          entries.add((ItemConvertible)Items.CHISELED_BOOKSHELF);
          entries.add((ItemConvertible)Items.FURNACE);
          entries.add((ItemConvertible)Items.TRAPPED_CHEST);
+         entries.add((ItemConvertible)Items.JUKEBOX);
          entries.add((ItemConvertible)Items.OBSERVER);
          entries.add((ItemConvertible)Items.NOTE_BLOCK);
          entries.add((ItemConvertible)Items.COMPOSTER);

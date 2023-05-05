@@ -126,7 +126,7 @@ public class ItemRenderer implements SynchronousResourceReloader {
 
             RenderLayer lv2 = RenderLayers.getItemLayer(stack, bl3);
             VertexConsumer lv4;
-            if (stack.isIn(ItemTags.COMPASSES) && stack.hasGlint()) {
+            if (method_51795(stack) && stack.hasGlint()) {
                matrices.push();
                MatrixStack.Entry lv3 = matrices.peek();
                if (renderMode == ModelTransformationMode.GUI) {
@@ -155,6 +155,10 @@ public class ItemRenderer implements SynchronousResourceReloader {
 
          matrices.pop();
       }
+   }
+
+   private static boolean method_51795(ItemStack arg) {
+      return arg.isIn(ItemTags.COMPASSES) || arg.isOf(Items.CLOCK);
    }
 
    public static VertexConsumer getArmorGlintConsumer(VertexConsumerProvider provider, RenderLayer layer, boolean solid, boolean glint) {

@@ -3,7 +3,6 @@ package net.minecraft.world.chunk.light;
 import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.Arrays;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -26,14 +25,7 @@ public abstract class ChunkLightProvider implements ChunkLightingView {
    protected static final Direction[] DIRECTIONS = Direction.values();
    protected final ChunkProvider chunkProvider;
    protected final LightStorage lightStorage;
-   private final LongSet blockPositionsToCheck = new LongOpenHashSet(512, 0.5F) {
-      protected void rehash(int i) {
-         if (i > 512) {
-            super.rehash(i);
-         }
-
-      }
-   };
+   private final LongOpenHashSet blockPositionsToCheck = new LongOpenHashSet(512, 0.5F);
    private final LongArrayFIFOQueue field_44734 = new LongArrayFIFOQueue();
    private final LongArrayFIFOQueue field_44735 = new LongArrayFIFOQueue();
    private final BlockPos.Mutable reusableBlockPos = new BlockPos.Mutable();
@@ -143,32 +135,7 @@ public abstract class ChunkLightProvider implements ChunkLightingView {
       this.lightStorage.setColumnEnabled(ChunkSectionPos.withZeroY(pos.x, pos.z), retainData);
    }
 
-   protected void markSectionAsChecked(long sectionPos) {
-      if (!this.blockPositionsToCheck.isEmpty()) {
-         if (this.blockPositionsToCheck.size() < 8192) {
-            this.blockPositionsToCheck.removeIf((blockPos) -> {
-               return ChunkSectionPos.fromBlockPos(blockPos) == sectionPos;
-            });
-         } else {
-            int i = ChunkSectionPos.getBlockCoord(ChunkSectionPos.unpackX(sectionPos));
-            int j = ChunkSectionPos.getBlockCoord(ChunkSectionPos.unpackY(sectionPos));
-            int k = ChunkSectionPos.getBlockCoord(ChunkSectionPos.unpackZ(sectionPos));
-
-            for(int m = 0; m < 16; ++m) {
-               for(int n = 0; n < 16; ++n) {
-                  for(int o = 0; o < 16; ++o) {
-                     long p = BlockPos.asLong(i + m, j + n, k + o);
-                     this.blockPositionsToCheck.remove(p);
-                  }
-               }
-            }
-
-         }
-      }
-   }
-
    public int doLightUpdates() {
-      this.lightStorage.updateLight(this);
       LongIterator longIterator = this.blockPositionsToCheck.iterator();
 
       while(longIterator.hasNext()) {
@@ -176,10 +143,12 @@ public abstract class ChunkLightProvider implements ChunkLightingView {
       }
 
       this.blockPositionsToCheck.clear();
+      this.blockPositionsToCheck.trim(512);
       int i = 0;
       i += this.method_51570();
       i += this.method_51567();
       this.clearChunkCache();
+      this.lightStorage.updateLight(this);
       this.lightStorage.notifyChanges();
       return i;
    }

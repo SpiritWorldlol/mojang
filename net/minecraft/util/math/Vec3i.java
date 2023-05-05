@@ -234,7 +234,7 @@ public class Vec3i implements Comparable {
 
    static {
       CODEC = Codec.INT_STREAM.comapFlatMap((stream) -> {
-         return Util.toArray((IntStream)stream, 3).map((coordinates) -> {
+         return Util.decodeFixedLengthArray(stream, 3).map((coordinates) -> {
             return new Vec3i(coordinates[0], coordinates[1], coordinates[2]);
          });
       }, (vec) -> {

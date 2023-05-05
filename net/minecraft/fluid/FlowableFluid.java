@@ -188,11 +188,7 @@ public abstract class FlowableFluid extends Fluid {
          return this.getFlowing(8, true);
       } else {
          int k = i - this.getLevelDecreasePerBlock(world);
-         if (k <= 0) {
-            return Fluids.EMPTY.getDefaultState();
-         } else {
-            return this.getFlowing(k, false);
-         }
+         return k <= 0 ? Fluids.EMPTY.getDefaultState() : this.getFlowing(k, false);
       }
    }
 

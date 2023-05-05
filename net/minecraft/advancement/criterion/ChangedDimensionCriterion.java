@@ -3,7 +3,7 @@ package net.minecraft.advancement.criterion;
 import com.google.gson.JsonObject;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateSerializer;
-import net.minecraft.predicate.entity.EntityPredicate;
+import net.minecraft.predicate.entity.EntityConditions;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -18,7 +18,7 @@ public class ChangedDimensionCriterion extends AbstractCriterion {
       return ID;
    }
 
-   public Conditions conditionsFromJson(JsonObject jsonObject, EntityPredicate.Extended arg, AdvancementEntityPredicateDeserializer arg2) {
+   public Conditions conditionsFromJson(JsonObject jsonObject, EntityConditions arg, AdvancementEntityPredicateDeserializer arg2) {
       RegistryKey lv = jsonObject.has("from") ? RegistryKey.of(RegistryKeys.WORLD, new Identifier(JsonHelper.getString(jsonObject, "from"))) : null;
       RegistryKey lv2 = jsonObject.has("to") ? RegistryKey.of(RegistryKeys.WORLD, new Identifier(JsonHelper.getString(jsonObject, "to"))) : null;
       return new Conditions(arg, lv, lv2);
@@ -31,7 +31,7 @@ public class ChangedDimensionCriterion extends AbstractCriterion {
    }
 
    // $FF: synthetic method
-   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityPredicate.Extended playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityConditions playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
       return this.conditionsFromJson(obj, playerPredicate, predicateDeserializer);
    }
 
@@ -41,26 +41,26 @@ public class ChangedDimensionCriterion extends AbstractCriterion {
       @Nullable
       private final RegistryKey to;
 
-      public Conditions(EntityPredicate.Extended player, @Nullable RegistryKey from, @Nullable RegistryKey to) {
+      public Conditions(EntityConditions player, @Nullable RegistryKey from, @Nullable RegistryKey to) {
          super(ChangedDimensionCriterion.ID, player);
          this.from = from;
          this.to = to;
       }
 
       public static Conditions create() {
-         return new Conditions(EntityPredicate.Extended.EMPTY, (RegistryKey)null, (RegistryKey)null);
+         return new Conditions(EntityConditions.EMPTY, (RegistryKey)null, (RegistryKey)null);
       }
 
       public static Conditions create(RegistryKey from, RegistryKey to) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, from, to);
+         return new Conditions(EntityConditions.EMPTY, from, to);
       }
 
       public static Conditions to(RegistryKey to) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, (RegistryKey)null, to);
+         return new Conditions(EntityConditions.EMPTY, (RegistryKey)null, to);
       }
 
       public static Conditions from(RegistryKey from) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, from, (RegistryKey)null);
+         return new Conditions(EntityConditions.EMPTY, from, (RegistryKey)null);
       }
 
       public boolean matches(RegistryKey from, RegistryKey to) {

@@ -64,6 +64,8 @@ public class SnifferEntity extends AnimalEntity {
    private static final int field_42658 = 30;
    private static final int field_42659 = 120;
    private static final int field_42661 = 48000;
+   private static final float field_44785 = 0.4F;
+   private static final EntityDimensions field_44786;
    private static final TrackedData STATE;
    private static final TrackedData FINISH_DIG_TIME;
    public final AnimationState feelingHappyAnimationState = new AnimationState();
@@ -101,6 +103,10 @@ public class SnifferEntity extends AnimalEntity {
 
    public void onFinishPathfinding() {
       this.setPathfindingPenalty(PathNodeType.WATER, -1.0F);
+   }
+
+   public EntityDimensions getDimensions(EntityPose pose) {
+      return this.dataTracker.method_51696(STATE) && this.getState() == SnifferEntity.State.DIGGING ? field_44786.scaled(this.getScaleFactor()) : super.getDimensions(pose);
    }
 
    public boolean isPanicking() {
@@ -161,6 +167,8 @@ public class SnifferEntity extends AnimalEntity {
             case FEELING_HAPPY:
                this.feelingHappyAnimationState.startIfNotRunning(this.age);
          }
+
+         this.calculateDimensions();
       }
 
       super.onTrackedDataSet(data);
@@ -264,16 +272,16 @@ public class SnifferEntity extends AnimalEntity {
    private SnifferEntity spawnDiggingParticles(AnimationState diggingAnimationState) {
       boolean bl = diggingAnimationState.getTimeRunning() > 1700L && diggingAnimationState.getTimeRunning() < 6000L;
       if (bl) {
-         BlockState lv = this.getSteppingBlockState();
-         BlockPos lv2 = this.getDigPos();
-         if (lv.getRenderType() != BlockRenderType.INVISIBLE) {
+         BlockPos lv = this.getDigPos();
+         BlockState lv2 = this.getWorld().getBlockState(lv.down());
+         if (lv2.getRenderType() != BlockRenderType.INVISIBLE) {
             for(int i = 0; i < 30; ++i) {
-               Vec3d lv3 = Vec3d.ofCenter(lv2).add(0.0, -0.6499999761581421, 0.0);
-               this.getWorld().addParticle(new BlockStateParticleEffect(ParticleTypes.BLOCK, lv), lv3.x, lv3.y, lv3.z, 0.0, 0.0, 0.0);
+               Vec3d lv3 = Vec3d.ofCenter(lv).add(0.0, -0.6499999761581421, 0.0);
+               this.getWorld().addParticle(new BlockStateParticleEffect(ParticleTypes.BLOCK, lv2), lv3.x, lv3.y, lv3.z, 0.0, 0.0, 0.0);
             }
 
             if (this.age % 10 == 0) {
-               this.getWorld().playSound(this.getX(), this.getY(), this.getZ(), lv.getSoundGroup().getHitSound(), this.getSoundCategory(), 0.5F, 0.5F, false);
+               this.getWorld().playSound(this.getX(), this.getY(), this.getZ(), lv2.getSoundGroup().getHitSound(), this.getSoundCategory(), 0.5F, 0.5F, false);
             }
          }
       }
@@ -437,6 +445,7 @@ public class SnifferEntity extends AnimalEntity {
    }
 
    static {
+      field_44786 = EntityDimensions.changing(EntityType.SNIFFER.getWidth(), EntityType.SNIFFER.getHeight() - 0.4F);
       STATE = DataTracker.registerData(SnifferEntity.class, TrackedDataHandlerRegistry.SNIFFER_STATE);
       FINISH_DIG_TIME = DataTracker.registerData(SnifferEntity.class, TrackedDataHandlerRegistry.INTEGER);
    }

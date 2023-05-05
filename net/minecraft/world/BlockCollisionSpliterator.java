@@ -1,6 +1,7 @@
 package net.minecraft.world;
 
 import com.google.common.collect.AbstractIterator;
+import java.util.function.BiFunction;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
@@ -27,18 +28,16 @@ public class BlockCollisionSpliterator extends AbstractIterator {
    @Nullable
    private BlockView chunk;
    private long chunkPos;
+   private final BiFunction field_44787;
 
-   public BlockCollisionSpliterator(CollisionView world, @Nullable Entity entity, Box box) {
-      this(world, entity, box, false);
-   }
-
-   public BlockCollisionSpliterator(CollisionView world, @Nullable Entity entity, Box box, boolean forEntity) {
+   public BlockCollisionSpliterator(CollisionView world, @Nullable Entity entity, Box box, boolean forEntity, BiFunction biFunction) {
       this.context = entity == null ? ShapeContext.absent() : ShapeContext.of(entity);
       this.pos = new BlockPos.Mutable();
       this.boxShape = VoxelShapes.cuboid(box);
       this.world = world;
       this.box = box;
       this.forEntity = forEntity;
+      this.field_44787 = biFunction;
       int i = MathHelper.floor(box.minX - 1.0E-7) - 1;
       int j = MathHelper.floor(box.maxX + 1.0E-7) + 1;
       int k = MathHelper.floor(box.minY - 1.0E-7) - 1;
@@ -63,7 +62,7 @@ public class BlockCollisionSpliterator extends AbstractIterator {
       }
    }
 
-   protected VoxelShape computeNext() {
+   protected Object computeNext() {
       while(true) {
          if (this.blockIterator.step()) {
             int i = this.blockIterator.getX();
@@ -91,23 +90,18 @@ public class BlockCollisionSpliterator extends AbstractIterator {
                   continue;
                }
 
-               return lv3.offset((double)i, (double)j, (double)k);
+               return this.field_44787.apply(this.pos, lv3.offset((double)i, (double)j, (double)k));
             }
 
             VoxelShape lv4 = lv3.offset((double)i, (double)j, (double)k);
-            if (!VoxelShapes.matchesAnywhere(lv4, this.boxShape, BooleanBiFunction.AND)) {
+            if (lv4.isEmpty() || !VoxelShapes.matchesAnywhere(lv4, this.boxShape, BooleanBiFunction.AND)) {
                continue;
             }
 
-            return lv4;
+            return this.field_44787.apply(this.pos, lv4);
          }
 
-         return (VoxelShape)this.endOfData();
+         return this.endOfData();
       }
-   }
-
-   // $FF: synthetic method
-   protected Object computeNext() {
-      return this.computeNext();
    }
 }

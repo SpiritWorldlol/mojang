@@ -66,6 +66,9 @@ public class SculkSensorBlock extends BlockWithEntity implements Waterloggable {
       if (getPhase(state) != SculkSensorPhase.ACTIVE) {
          if (getPhase(state) == SculkSensorPhase.COOLDOWN) {
             world.setBlockState(pos, (BlockState)state.with(SCULK_SENSOR_PHASE, SculkSensorPhase.INACTIVE), Block.NOTIFY_ALL);
+            if (!(Boolean)state.get(WATERLOGGED)) {
+               world.playSound((PlayerEntity)null, pos, SoundEvents.BLOCK_SCULK_SENSOR_CLICKING_STOP, SoundCategory.BLOCKS, 1.0F, world.random.nextFloat() * 0.2F + 0.8F);
+            }
          }
 
       } else {
@@ -163,14 +166,10 @@ public class SculkSensorBlock extends BlockWithEntity implements Waterloggable {
       return getPhase(state) == SculkSensorPhase.INACTIVE;
    }
 
-   public static void setCooldown(World world, BlockPos pos, BlockState state) {
-      world.setBlockState(pos, (BlockState)((BlockState)state.with(SCULK_SENSOR_PHASE, SculkSensorPhase.COOLDOWN)).with(POWER, 0), Block.NOTIFY_ALL);
-      world.scheduleBlockTick(pos, state.getBlock(), 10);
-      if (!(Boolean)state.get(WATERLOGGED)) {
-         world.playSound((PlayerEntity)null, pos, SoundEvents.BLOCK_SCULK_SENSOR_CLICKING_STOP, SoundCategory.BLOCKS, 1.0F, world.random.nextFloat() * 0.2F + 0.8F);
-      }
-
-      updateNeighbors(world, pos, state);
+   public static void setCooldown(World arg, BlockPos pos, BlockState arg3) {
+      arg.setBlockState(pos, (BlockState)((BlockState)arg3.with(SCULK_SENSOR_PHASE, SculkSensorPhase.COOLDOWN)).with(POWER, 0), Block.NOTIFY_ALL);
+      arg.scheduleBlockTick(pos, arg3.getBlock(), 10);
+      updateNeighbors(arg, pos, arg3);
    }
 
    @VisibleForTesting

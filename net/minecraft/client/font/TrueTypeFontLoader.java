@@ -1,72 +1,38 @@
 package net.minecraft.client.font;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.platform.TextureUtil;
 import com.mojang.datafixers.util.Either;
-import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.JsonHelper;
+import net.minecraft.util.Util;
 import org.lwjgl.stb.STBTTFontinfo;
 import org.lwjgl.stb.STBTruetype;
 import org.lwjgl.system.MemoryUtil;
-import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
-public class TrueTypeFontLoader implements FontLoader {
-   private static final Logger LOGGER = LogUtils.getLogger();
-   private final Identifier filename;
-   private final float size;
-   private final float oversample;
-   private final float shiftX;
-   private final float shiftY;
-   private final String excludedCharacters;
+public record TrueTypeFontLoader(Identifier location, float size, float oversample, Shift shift, String skip) implements FontLoader {
+   private static final Codec SKIP_CODEC;
+   public static final MapCodec CODEC;
 
-   public TrueTypeFontLoader(Identifier filename, float size, float oversample, float shiftX, float shiftY, String excludedCharacters) {
-      this.filename = filename;
-      this.size = size;
-      this.oversample = oversample;
-      this.shiftX = shiftX;
-      this.shiftY = shiftY;
-      this.excludedCharacters = excludedCharacters;
+   public TrueTypeFontLoader(Identifier arg, float f, float g, Shift arg2, String string) {
+      this.location = arg;
+      this.size = f;
+      this.oversample = g;
+      this.shift = arg2;
+      this.skip = string;
    }
 
-   public static FontLoader fromJson(JsonObject json) {
-      float f = 0.0F;
-      float g = 0.0F;
-      if (json.has("shift")) {
-         JsonArray jsonArray = json.getAsJsonArray("shift");
-         if (jsonArray.size() != 2) {
-            throw new JsonParseException("Expected 2 elements in 'shift', found " + jsonArray.size());
-         }
-
-         f = JsonHelper.asFloat(jsonArray.get(0), "shift[0]");
-         g = JsonHelper.asFloat(jsonArray.get(1), "shift[1]");
-      }
-
-      StringBuilder stringBuilder = new StringBuilder();
-      if (json.has("skip")) {
-         JsonElement jsonElement = json.get("skip");
-         if (jsonElement.isJsonArray()) {
-            JsonArray jsonArray2 = JsonHelper.asArray(jsonElement, "skip");
-
-            for(int i = 0; i < jsonArray2.size(); ++i) {
-               stringBuilder.append(JsonHelper.asString(jsonArray2.get(i), "skip[" + i + "]"));
-            }
-         } else {
-            stringBuilder.append(JsonHelper.asString(jsonElement, "skip"));
-         }
-      }
-
-      return new TrueTypeFontLoader(new Identifier(JsonHelper.getString(json, "file")), JsonHelper.getFloat(json, "size", 11.0F), JsonHelper.getFloat(json, "oversample", 1.0F), f, g, stringBuilder.toString());
+   public FontType getType() {
+      return FontType.TTF;
    }
 
    public Either build() {
@@ -78,20 +44,18 @@ public class TrueTypeFontLoader implements FontLoader {
       ByteBuffer byteBuffer = null;
 
       try {
-         InputStream inputStream = resourceManager.open(this.filename.withPrefixedPath("font/"));
+         InputStream inputStream = resourceManager.open(this.location.withPrefixedPath("font/"));
 
          TrueTypeFont var5;
          try {
-            LOGGER.debug("Loading font {}", this.filename);
             sTBTTFontinfo = STBTTFontinfo.malloc();
             byteBuffer = TextureUtil.readResource(inputStream);
             byteBuffer.flip();
-            LOGGER.debug("Reading font {}", this.filename);
             if (!STBTruetype.stbtt_InitFont(sTBTTFontinfo, byteBuffer)) {
                throw new IOException("Invalid ttf");
             }
 
-            var5 = new TrueTypeFont(byteBuffer, sTBTTFontinfo, this.size, this.oversample, this.shiftX, this.shiftY, this.excludedCharacters);
+            var5 = new TrueTypeFont(byteBuffer, sTBTTFontinfo, this.size, this.oversample, this.shift.x, this.shift.y, this.skip);
          } catch (Throwable var8) {
             if (inputStream != null) {
                try {
@@ -116,6 +80,70 @@ public class TrueTypeFontLoader implements FontLoader {
 
          MemoryUtil.memFree(byteBuffer);
          throw var9;
+      }
+   }
+
+   public Identifier location() {
+      return this.location;
+   }
+
+   public float size() {
+      return this.size;
+   }
+
+   public float oversample() {
+      return this.oversample;
+   }
+
+   public Shift shift() {
+      return this.shift;
+   }
+
+   public String skip() {
+      return this.skip;
+   }
+
+   static {
+      SKIP_CODEC = Codec.either(Codec.STRING, Codec.STRING.listOf()).xmap((either) -> {
+         return (String)either.map((string) -> {
+            return string;
+         }, (list) -> {
+            return String.join("", list);
+         });
+      }, Either::left);
+      CODEC = RecordCodecBuilder.mapCodec((instance) -> {
+         return instance.group(Identifier.CODEC.fieldOf("file").forGetter(TrueTypeFontLoader::location), Codec.FLOAT.optionalFieldOf("size", 11.0F).forGetter(TrueTypeFontLoader::size), Codec.FLOAT.optionalFieldOf("oversample", 1.0F).forGetter(TrueTypeFontLoader::oversample), TrueTypeFontLoader.Shift.CODEC.optionalFieldOf("shift", TrueTypeFontLoader.Shift.NONE).forGetter(TrueTypeFontLoader::shift), SKIP_CODEC.optionalFieldOf("skip", "").forGetter(TrueTypeFontLoader::skip)).apply(instance, TrueTypeFontLoader::new);
+      });
+   }
+
+   @Environment(EnvType.CLIENT)
+   public static record Shift(float x, float y) {
+      final float x;
+      final float y;
+      public static final Shift NONE = new Shift(0.0F, 0.0F);
+      public static final Codec CODEC;
+
+      public Shift(float f, float g) {
+         this.x = f;
+         this.y = g;
+      }
+
+      public float x() {
+         return this.x;
+      }
+
+      public float y() {
+         return this.y;
+      }
+
+      static {
+         CODEC = Codec.FLOAT.listOf().comapFlatMap((floatList) -> {
+            return Util.decodeFixedLengthList(floatList, 2).map((floatListx) -> {
+               return new Shift((Float)floatListx.get(0), (Float)floatListx.get(1));
+            });
+         }, (shift) -> {
+            return List.of(shift.x, shift.y);
+         });
       }
    }
 }

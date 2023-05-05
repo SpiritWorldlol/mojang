@@ -8,7 +8,7 @@ import java.util.List;
 import net.minecraft.item.ItemStack;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateSerializer;
-import net.minecraft.predicate.entity.EntityPredicate;
+import net.minecraft.predicate.entity.EntityConditions;
 import net.minecraft.predicate.item.ItemPredicate;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -21,7 +21,7 @@ public class RecipeCraftedCriterion extends AbstractCriterion {
       return ID;
    }
 
-   protected Conditions conditionsFromJson(JsonObject jsonObject, EntityPredicate.Extended arg, AdvancementEntityPredicateDeserializer arg2) {
+   protected Conditions conditionsFromJson(JsonObject jsonObject, EntityConditions arg, AdvancementEntityPredicateDeserializer arg2) {
       Identifier lv = new Identifier(JsonHelper.getString(jsonObject, "recipe_id"));
       ItemPredicate[] lvs = ItemPredicate.deserializeAll(jsonObject.get("ingredients"));
       return new Conditions(arg, lv, List.of(lvs));
@@ -34,7 +34,7 @@ public class RecipeCraftedCriterion extends AbstractCriterion {
    }
 
    // $FF: synthetic method
-   protected AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityPredicate.Extended playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+   protected AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityConditions playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
       return this.conditionsFromJson(obj, playerPredicate, predicateDeserializer);
    }
 
@@ -42,18 +42,18 @@ public class RecipeCraftedCriterion extends AbstractCriterion {
       private final Identifier recipeId;
       private final List ingredients;
 
-      public Conditions(EntityPredicate.Extended player, Identifier recipeId, List ingredients) {
+      public Conditions(EntityConditions player, Identifier recipeId, List ingredients) {
          super(RecipeCraftedCriterion.ID, player);
          this.recipeId = recipeId;
          this.ingredients = ingredients;
       }
 
       public static Conditions create(Identifier recipeId, List ingredients) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, recipeId, ingredients);
+         return new Conditions(EntityConditions.EMPTY, recipeId, ingredients);
       }
 
       public static Conditions create(Identifier recipeId) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, recipeId, List.of());
+         return new Conditions(EntityConditions.EMPTY, recipeId, List.of());
       }
 
       boolean matches(Identifier recipeId, List ingredients) {

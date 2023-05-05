@@ -4,22 +4,25 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
+import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.math.random.CheckedRandom;
 import net.minecraft.util.math.random.ChunkRandom;
 
 public class RandomSpreadStructurePlacement extends StructurePlacement {
-   public static final Codec CODEC = RecordCodecBuilder.mapCodec((instance) -> {
+   public static final Codec CODEC = Codecs.validateMap(RecordCodecBuilder.mapCodec((instance) -> {
       return buildCodec(instance).and(instance.group(Codec.intRange(0, 4096).fieldOf("spacing").forGetter(RandomSpreadStructurePlacement::getSpacing), Codec.intRange(0, 4096).fieldOf("separation").forGetter(RandomSpreadStructurePlacement::getSeparation), SpreadType.CODEC.optionalFieldOf("spread_type", SpreadType.LINEAR).forGetter(RandomSpreadStructurePlacement::getSpreadType))).apply(instance, RandomSpreadStructurePlacement::new);
-   }).flatXmap((placement) -> {
-      return placement.spacing <= placement.separation ? DataResult.error(() -> {
-         return "Spacing has to be larger than separation";
-      }) : DataResult.success(placement);
-   }, DataResult::success).codec();
+   }), RandomSpreadStructurePlacement::method_51720).codec();
    private final int spacing;
    private final int separation;
    private final SpreadType spreadType;
+
+   private static DataResult method_51720(RandomSpreadStructurePlacement arg) {
+      return arg.spacing <= arg.separation ? DataResult.error(() -> {
+         return "Spacing has to be larger than separation";
+      }) : DataResult.success(arg);
+   }
 
    public RandomSpreadStructurePlacement(Vec3i locateOffset, StructurePlacement.FrequencyReductionMethod frequencyReductionMethod, float frequency, int salt, Optional exclusionZone, int spacing, int separation, SpreadType spreadType) {
       super(locateOffset, frequencyReductionMethod, frequency, salt, exclusionZone);

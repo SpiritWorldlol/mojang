@@ -52,10 +52,10 @@ public class SpectatorHud implements SpectatorMenuCloseCallback {
          if (f <= 0.0F) {
             this.spectatorMenu.close();
          } else {
-            int i = this.client.getWindow().getScaledWidth() / 2;
+            int i = context.getScaledWindowWidth() / 2;
             context.getMatrices().push();
             context.getMatrices().translate(0.0F, 0.0F, -90.0F);
-            int j = MathHelper.floor((float)this.client.getWindow().getScaledHeight() - 22.0F * f);
+            int j = MathHelper.floor((float)context.getScaledWindowHeight() - 22.0F * f);
             SpectatorMenuState lv = this.spectatorMenu.getCurrentState();
             this.renderSpectatorMenu(context, f, i, j, lv);
             context.getMatrices().pop();
@@ -74,7 +74,7 @@ public class SpectatorHud implements SpectatorMenuCloseCallback {
       context.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
       for(int k = 0; k < 9; ++k) {
-         this.renderSpectatorCommand(context, k, this.client.getWindow().getScaledWidth() / 2 - 90 + k * 20 + 2, (float)(y + 3), height, state.getCommand(k));
+         this.renderSpectatorCommand(context, k, context.getScaledWindowWidth() / 2 - 90 + k * 20 + 2, (float)(y + 3), height, state.getCommand(k));
       }
 
       RenderSystem.disableBlend();
@@ -104,8 +104,8 @@ public class SpectatorHud implements SpectatorMenuCloseCallback {
          SpectatorMenuCommand lv = this.spectatorMenu.getSelectedCommand();
          Text lv2 = lv == SpectatorMenu.BLANK_COMMAND ? this.spectatorMenu.getCurrentGroup().getPrompt() : lv.getName();
          if (lv2 != null) {
-            int j = (this.client.getWindow().getScaledWidth() - this.client.textRenderer.getWidth((StringVisitable)lv2)) / 2;
-            int k = this.client.getWindow().getScaledHeight() - 35;
+            int j = (context.getScaledWindowWidth() - this.client.textRenderer.getWidth((StringVisitable)lv2)) / 2;
+            int k = context.getScaledWindowHeight() - 35;
             context.drawTextWithShadow(this.client.textRenderer, lv2, j, k, 16777215 + (i << 24));
          }
       }

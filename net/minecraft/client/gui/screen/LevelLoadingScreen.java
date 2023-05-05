@@ -99,21 +99,23 @@ public class LevelLoadingScreen extends Screen {
       int s = centerY - q / 2;
       int t = o / 2 + 1;
       int u = -16772609;
-      if (pixelMargin != 0) {
-         arg.fill(centerX - t, centerY - t, centerX - t + 1, centerY + t, -16772609);
-         arg.fill(centerX + t - 1, centerY - t, centerX + t, centerY + t, -16772609);
-         arg.fill(centerX - t, centerY - t, centerX + t, centerY - t + 1, -16772609);
-         arg.fill(centerX - t, centerY + t - 1, centerX + t, centerY + t, -16772609);
-      }
-
-      for(int v = 0; v < p; ++v) {
-         for(int w = 0; w < p; ++w) {
-            ChunkStatus lv = progressProvider.getChunkStatus(v, w);
-            int x = r + v * m;
-            int y = s + w * m;
-            arg.fill(x, y, x + pixelSize, y + pixelSize, STATUS_TO_COLOR.getInt(lv) | -16777216);
+      arg.method_51741(() -> {
+         if (pixelMargin != 0) {
+            arg.fill(centerX - t, centerY - t, centerX - t + 1, centerY + t, -16772609);
+            arg.fill(centerX + t - 1, centerY - t, centerX + t, centerY + t, -16772609);
+            arg.fill(centerX - t, centerY - t, centerX + t, centerY - t + 1, -16772609);
+            arg.fill(centerX - t, centerY + t - 1, centerX + t, centerY + t, -16772609);
          }
-      }
 
+         for(int rx = 0; rx < p; ++rx) {
+            for(int sx = 0; sx < p; ++sx) {
+               ChunkStatus lv = progressProvider.getChunkStatus(rx, sx);
+               int tx = r + rx * m;
+               int u = s + sx * m;
+               arg.fill(tx, u, tx + pixelSize, u + pixelSize, STATUS_TO_COLOR.getInt(lv) | -16777216);
+            }
+         }
+
+      });
    }
 }

@@ -7,7 +7,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.predicate.StatePredicate;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateSerializer;
-import net.minecraft.predicate.entity.EntityPredicate;
+import net.minecraft.predicate.entity.EntityConditions;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -21,7 +21,7 @@ public class EnterBlockCriterion extends AbstractCriterion {
       return ID;
    }
 
-   public Conditions conditionsFromJson(JsonObject jsonObject, EntityPredicate.Extended arg, AdvancementEntityPredicateDeserializer arg2) {
+   public Conditions conditionsFromJson(JsonObject jsonObject, EntityConditions arg, AdvancementEntityPredicateDeserializer arg2) {
       Block lv = getBlock(jsonObject);
       StatePredicate lv2 = StatePredicate.fromJson(jsonObject.get("state"));
       if (lv != null) {
@@ -52,7 +52,7 @@ public class EnterBlockCriterion extends AbstractCriterion {
    }
 
    // $FF: synthetic method
-   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityPredicate.Extended playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityConditions playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
       return this.conditionsFromJson(obj, playerPredicate, predicateDeserializer);
    }
 
@@ -61,14 +61,14 @@ public class EnterBlockCriterion extends AbstractCriterion {
       private final Block block;
       private final StatePredicate state;
 
-      public Conditions(EntityPredicate.Extended player, @Nullable Block block, StatePredicate state) {
+      public Conditions(EntityConditions player, @Nullable Block block, StatePredicate state) {
          super(EnterBlockCriterion.ID, player);
          this.block = block;
          this.state = state;
       }
 
       public static Conditions block(Block block) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, block, StatePredicate.ANY);
+         return new Conditions(EntityConditions.EMPTY, block, StatePredicate.ANY);
       }
 
       public JsonObject toJson(AdvancementEntityPredicateSerializer predicateSerializer) {

@@ -200,6 +200,11 @@ public class TestContext {
       };
    }
 
+   public LivingEntity method_51821(LivingEntity arg) {
+      arg.setHealth(0.25F);
+      return arg;
+   }
+
    public PlayerEntity createMockCreativePlayer() {
       return new PlayerEntity(this.getWorld(), BlockPos.ORIGIN, 0.0F, new GameProfile(UUID.randomUUID(), "test-mock-player")) {
          public boolean isSpectator() {

@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.UnmodifiableIterator;
 import com.mojang.blaze3d.platform.GlDebugInfo;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.DataFixUtils;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSets;
@@ -31,6 +30,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gl.PostEffectProcessor;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.fluid.FluidState;
@@ -105,22 +105,24 @@ public class DebugHud {
       this.chunk = null;
    }
 
-   public void render(DrawContext context) {
+   public void render(DrawContext arg) {
       this.client.getProfiler().push("debug");
       Entity lv = this.client.getCameraEntity();
       this.blockHit = lv.raycast(20.0, 0.0F, false);
       this.fluidHit = lv.raycast(20.0, 0.0F, true);
-      this.renderLeftText(context);
-      this.renderRightText(context);
-      if (this.client.options.debugTpsEnabled) {
-         int i = this.client.getWindow().getScaledWidth();
-         this.drawMetricsData(context, this.client.getMetricsData(), 0, i / 2, true);
-         IntegratedServer lv2 = this.client.getServer();
-         if (lv2 != null) {
-            this.drawMetricsData(context, lv2.getMetricsData(), i - Math.min(i / 2, 240), i / 2, false);
+      arg.method_51741(() -> {
+         this.renderLeftText(arg);
+         this.renderRightText(arg);
+         if (this.client.options.debugTpsEnabled) {
+            int i = arg.getScaledWindowWidth();
+            this.drawMetricsData(arg, this.client.getMetricsData(), 0, i / 2, true);
+            IntegratedServer lv = this.client.getServer();
+            if (lv != null) {
+               this.drawMetricsData(arg, lv.getMetricsData(), i - Math.min(i / 2, 240), i / 2, false);
+            }
          }
-      }
 
+      });
       this.client.getProfiler().pop();
    }
 
@@ -131,35 +133,40 @@ public class DebugHud {
       String var10001 = this.client.options.debugProfilerEnabled ? "visible" : "hidden";
       list.add("Debug: Pie [shift]: " + var10001 + (bl ? " FPS + TPS" : " FPS") + " [alt]: " + (this.client.options.debugTpsEnabled ? "visible" : "hidden"));
       list.add("For help: press F3 + Q");
-
-      for(int i = 0; i < list.size(); ++i) {
-         String string = (String)list.get(i);
-         if (!Strings.isNullOrEmpty(string)) {
-            Objects.requireNonNull(this.textRenderer);
-            int j = 9;
-            int k = this.textRenderer.getWidth(string);
-            int l = true;
-            int m = 2 + j * i;
-            context.fill(1, m - 1, 2 + k + 1, m + j - 1, -1873784752);
-            context.drawText(this.textRenderer, (String)string, 2, m, 14737632, false);
-         }
-      }
-
+      this.method_51745(context, list, true);
    }
 
    protected void renderRightText(DrawContext context) {
       List list = this.getRightText();
+      this.method_51745(context, list, false);
+   }
 
-      for(int i = 0; i < list.size(); ++i) {
-         String string = (String)list.get(i);
+   private void method_51745(DrawContext arg, List list, boolean bl) {
+      Objects.requireNonNull(this.textRenderer);
+      int i = 9;
+
+      int j;
+      String string;
+      int k;
+      int l;
+      int m;
+      for(j = 0; j < list.size(); ++j) {
+         string = (String)list.get(j);
          if (!Strings.isNullOrEmpty(string)) {
-            Objects.requireNonNull(this.textRenderer);
-            int j = 9;
-            int k = this.textRenderer.getWidth(string);
-            int l = this.client.getWindow().getScaledWidth() - 2 - k;
-            int m = 2 + j * i;
-            context.fill(l - 1, m - 1, l + k + 1, m + j - 1, -1873784752);
-            context.drawText(this.textRenderer, string, l, m, 14737632, false);
+            k = this.textRenderer.getWidth(string);
+            l = bl ? 2 : arg.getScaledWindowWidth() - 2 - k;
+            m = 2 + i * j;
+            arg.fill(l - 1, m - 1, l + k + 1, m + i - 1, -1873784752);
+         }
+      }
+
+      for(j = 0; j < list.size(); ++j) {
+         string = (String)list.get(j);
+         if (!Strings.isNullOrEmpty(string)) {
+            k = this.textRenderer.getWidth(string);
+            l = bl ? 2 : arg.getScaledWindowWidth() - 2 - k;
+            m = 2 + i * j;
+            arg.drawText(this.textRenderer, string, l, m, 14737632, false);
          }
       }
 
@@ -477,7 +484,6 @@ public class DebugHud {
    }
 
    private void drawMetricsData(DrawContext context, MetricsData metricsData, int x, int width, boolean showFps) {
-      RenderSystem.disableDepthTest();
       int k = metricsData.getStartIndex();
       int l = metricsData.getCurrentIndex();
       long[] ls = metricsData.getSamples();
@@ -498,37 +504,37 @@ public class DebugHud {
          q += (long)u;
       }
 
-      t = this.client.getWindow().getScaledHeight();
-      context.fill(x, t - 60, x + p, t, -1873784752);
+      t = context.getScaledWindowHeight();
+      context.method_51739(RenderLayer.method_51785(), x, t - 60, x + p, t, -1873784752);
 
       while(m != l) {
          u = metricsData.scaleSample(ls[m], showFps ? 30 : 60, showFps ? 60 : 20);
          int v = showFps ? 100 : 60;
          int w = this.getMetricsLineColor(MathHelper.clamp(u, 0, v), 0, v / 2, v);
-         context.fill(n, t - u, n + 1, t, w);
+         context.method_51739(RenderLayer.method_51785(), n, t - u, n + 1, t, w);
          ++n;
          m = metricsData.wrapIndex(m + 1);
       }
 
       if (showFps) {
-         context.fill(x + 1, t - 30 + 1, x + 14, t - 30 + 10, -1873784752);
+         context.method_51739(RenderLayer.method_51785(), x + 1, t - 30 + 1, x + 14, t - 30 + 10, -1873784752);
          context.drawText(this.textRenderer, "60 FPS", x + 2, t - 30 + 2, 14737632, false);
-         context.drawHorizontalLine(x, x + p - 1, t - 30, -1);
-         context.fill(x + 1, t - 60 + 1, x + 14, t - 60 + 10, -1873784752);
+         context.method_51738(RenderLayer.method_51785(), x, x + p - 1, t - 30, -1);
+         context.method_51739(RenderLayer.method_51785(), x + 1, t - 60 + 1, x + 14, t - 60 + 10, -1873784752);
          context.drawText(this.textRenderer, "30 FPS", x + 2, t - 60 + 2, 14737632, false);
-         context.drawHorizontalLine(x, x + p - 1, t - 60, -1);
+         context.method_51738(RenderLayer.method_51785(), x, x + p - 1, t - 60, -1);
       } else {
-         context.fill(x + 1, t - 60 + 1, x + 14, t - 60 + 10, -1873784752);
+         context.method_51739(RenderLayer.method_51785(), x + 1, t - 60 + 1, x + 14, t - 60 + 10, -1873784752);
          context.drawText(this.textRenderer, "20 TPS", x + 2, t - 60 + 2, 14737632, false);
-         context.drawHorizontalLine(x, x + p - 1, t - 60, -1);
+         context.method_51738(RenderLayer.method_51785(), x, x + p - 1, t - 60, -1);
       }
 
-      context.drawHorizontalLine(x, x + p - 1, t - 1, -1);
-      context.drawVerticalLine(x, t - 60, t, -1);
-      context.drawVerticalLine(x + p - 1, t - 60, t, -1);
+      context.method_51738(RenderLayer.method_51785(), x, x + p - 1, t - 1, -1);
+      context.method_51742(RenderLayer.method_51785(), x, t - 60, t, -1);
+      context.method_51742(RenderLayer.method_51785(), x + p - 1, t - 60, t, -1);
       u = (Integer)this.client.options.getMaxFps().getValue();
       if (showFps && u > 0 && u <= 250) {
-         context.drawHorizontalLine(x, x + p - 1, t - 1 - (int)(1800.0 / (double)u), -16711681);
+         context.method_51738(RenderLayer.method_51785(), x, x + p - 1, t - 1 - (int)(1800.0 / (double)u), -16711681);
       }
 
       String string = "" + r + " ms min";

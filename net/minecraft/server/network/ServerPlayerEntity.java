@@ -950,6 +950,7 @@ public class ServerPlayerEntity extends PlayerEntity {
 
    public void handleFall(double heightDifference, boolean onGround) {
       if (!this.isRegionUnloaded()) {
+         this.method_51703(onGround);
          BlockPos lv = this.getLandingPos();
          super.fall(heightDifference, onGround, this.getWorld().getBlockState(lv), lv);
       }

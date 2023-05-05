@@ -54,6 +54,8 @@ public class ClientLoginNetworkHandler implements ClientLoginPacketListener {
    private final boolean newWorld;
    @Nullable
    private final Duration worldLoadTime;
+   @Nullable
+   private String realmsMinigameName;
 
    public ClientLoginNetworkHandler(ClientConnection connection, MinecraftClient client, @Nullable ServerInfo serverInfo, @Nullable Screen parentScreen, boolean newWorld, @Nullable Duration worldLoadTime, Consumer statusConsumer) {
       this.connection = connection;
@@ -127,7 +129,7 @@ public class ClientLoginNetworkHandler implements ClientLoginPacketListener {
       this.statusConsumer.accept(Text.translatable("connect.joining"));
       this.profile = packet.getProfile();
       this.connection.setState(NetworkState.PLAY);
-      this.connection.setPacketListener(new ClientPlayNetworkHandler(this.client, this.parentScreen, this.connection, this.serverInfo, this.profile, this.client.getTelemetryManager().createWorldSession(this.newWorld, this.worldLoadTime)));
+      this.connection.setPacketListener(new ClientPlayNetworkHandler(this.client, this.parentScreen, this.connection, this.serverInfo, this.profile, this.client.getTelemetryManager().createWorldSession(this.newWorld, this.worldLoadTime, this.realmsMinigameName)));
    }
 
    public void onDisconnected(Text reason) {
@@ -157,5 +159,9 @@ public class ClientLoginNetworkHandler implements ClientLoginPacketListener {
    public void onQueryRequest(LoginQueryRequestS2CPacket packet) {
       this.statusConsumer.accept(Text.translatable("connect.negotiating"));
       this.connection.send(new LoginQueryResponseC2SPacket(packet.getQueryId(), (PacketByteBuf)null));
+   }
+
+   public void setRealmsMinigameName(String realmsMinigameName) {
+      this.realmsMinigameName = realmsMinigameName;
    }
 }

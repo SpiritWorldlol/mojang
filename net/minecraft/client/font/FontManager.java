@@ -4,11 +4,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import java.io.Reader;
@@ -38,7 +41,6 @@ import net.minecraft.resource.ResourceFinder;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceReloader;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.JsonHelper;
 import net.minecraft.util.Util;
 import net.minecraft.util.profiler.Profiler;
 import org.slf4j.Logger;
@@ -204,32 +206,31 @@ public class FontManager implements ResourceReloader, AutoCloseable {
             Reader reader = lv.getReader();
 
             try {
-               JsonArray jsonArray = JsonHelper.getArray((JsonObject)JsonHelper.deserialize(GSON, (Reader)reader, (Class)JsonObject.class), "providers");
+               JsonElement jsonElement = (JsonElement)GSON.fromJson(reader, JsonElement.class);
+               class_8556 lv2 = (class_8556)Util.getResult(FontManager.class_8556.field_44798.parse(JsonOps.INSTANCE, jsonElement), JsonParseException::new);
+               List list3 = lv2.providers;
 
-               for(int i = jsonArray.size() - 1; i >= 0; --i) {
-                  JsonObject jsonObject = JsonHelper.asObject(jsonArray.get(i), "providers[" + i + "]");
-                  String string = JsonHelper.getString(jsonObject, "type");
-                  FontType lv2 = FontType.byId(string);
+               for(int i = list3.size() - 1; i >= 0; --i) {
                   FontKey lv3 = new FontKey(id, lv.getResourcePackName(), i);
-                  list2.add(Pair.of(lv3, lv2.createLoader(jsonObject)));
+                  list2.add(Pair.of(lv3, (FontLoader)list3.get(i)));
                }
-            } catch (Throwable var13) {
+            } catch (Throwable var12) {
                if (reader != null) {
                   try {
                      reader.close();
-                  } catch (Throwable var12) {
-                     var13.addSuppressed(var12);
+                  } catch (Throwable var11) {
+                     var12.addSuppressed(var11);
                   }
                }
 
-               throw var13;
+               throw var12;
             }
 
             if (reader != null) {
                reader.close();
             }
-         } catch (Exception var14) {
-            LOGGER.warn("Unable to load font '{}' in {} in resourcepack: '{}'", new Object[]{id, "fonts.json", lv.getResourcePackName(), var14});
+         } catch (Exception var13) {
+            LOGGER.warn("Unable to load font '{}' in {} in resourcepack: '{}'", new Object[]{id, "fonts.json", lv.getResourcePackName(), var13});
          }
       }
 
@@ -302,6 +303,22 @@ public class FontManager implements ResourceReloader, AutoCloseable {
 
       public List allProviders() {
          return this.allProviders;
+      }
+   }
+
+   @Environment(EnvType.CLIENT)
+   private static record class_8556(List providers) {
+      final List providers;
+      public static final Codec field_44798 = RecordCodecBuilder.create((instance) -> {
+         return instance.group(FontLoader.CODEC.listOf().fieldOf("providers").forGetter(class_8556::providers)).apply(instance, class_8556::new);
+      });
+
+      private class_8556(List list) {
+         this.providers = list;
+      }
+
+      public List providers() {
+         return this.providers;
       }
    }
 

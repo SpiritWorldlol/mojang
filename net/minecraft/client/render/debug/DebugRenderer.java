@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.class_8560;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.render.Camera;
@@ -29,6 +30,7 @@ public class DebugRenderer {
    public final Renderer chunkBorderDebugRenderer;
    public final Renderer heightmapDebugRenderer;
    public final Renderer collisionDebugRenderer;
+   public final Renderer field_44827;
    public final Renderer neighborUpdateDebugRenderer;
    public final StructureDebugRenderer structureDebugRenderer;
    public final Renderer skyLightDebugRenderer;
@@ -50,6 +52,7 @@ public class DebugRenderer {
       this.chunkBorderDebugRenderer = new ChunkBorderDebugRenderer(client);
       this.heightmapDebugRenderer = new HeightmapDebugRenderer(client);
       this.collisionDebugRenderer = new CollisionDebugRenderer(client);
+      this.field_44827 = new class_8560(client);
       this.neighborUpdateDebugRenderer = new NeighborUpdateDebugRenderer(client);
       this.structureDebugRenderer = new StructureDebugRenderer(client);
       this.skyLightDebugRenderer = new SkyLightDebugRenderer(client);
@@ -72,6 +75,7 @@ public class DebugRenderer {
       this.chunkBorderDebugRenderer.clear();
       this.heightmapDebugRenderer.clear();
       this.collisionDebugRenderer.clear();
+      this.field_44827.clear();
       this.neighborUpdateDebugRenderer.clear();
       this.structureDebugRenderer.clear();
       this.skyLightDebugRenderer.clear();

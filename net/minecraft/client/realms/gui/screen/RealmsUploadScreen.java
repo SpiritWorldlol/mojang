@@ -318,13 +318,13 @@ public class RealmsUploadScreen extends RealmsScreen {
             long m = file.length();
             SizeUnit lv4 = SizeUnit.getLargestUnit(m);
             SizeUnit lv5 = SizeUnit.getLargestUnit(5368709120L);
-            if (SizeUnit.humanReadableSize(m, lv4).equals(SizeUnit.humanReadableSize(5368709120L, lv5)) && lv4 != SizeUnit.B) {
-               SizeUnit lv6 = SizeUnit.values()[lv4.ordinal() - 1];
-               this.setStatusTexts(Text.translatable("mco.upload.size.failure.line1", this.selectedLevel.getDisplayName()), Text.translatable("mco.upload.size.failure.line2", SizeUnit.humanReadableSize(m, lv6), SizeUnit.humanReadableSize(5368709120L, lv6)));
+            if (!SizeUnit.humanReadableSize(m, lv4).equals(SizeUnit.humanReadableSize(5368709120L, lv5)) || lv4 == SizeUnit.B) {
+               this.setStatusTexts(Text.translatable("mco.upload.size.failure.line1", this.selectedLevel.getDisplayName()), Text.translatable("mco.upload.size.failure.line2", SizeUnit.humanReadableSize(m, lv4), SizeUnit.humanReadableSize(5368709120L, lv5)));
                return;
             }
 
-            this.setStatusTexts(Text.translatable("mco.upload.size.failure.line1", this.selectedLevel.getDisplayName()), Text.translatable("mco.upload.size.failure.line2", SizeUnit.humanReadableSize(m, lv4), SizeUnit.humanReadableSize(5368709120L, lv5)));
+            SizeUnit lv6 = SizeUnit.values()[lv4.ordinal() - 1];
+            this.setStatusTexts(Text.translatable("mco.upload.size.failure.line1", this.selectedLevel.getDisplayName()), Text.translatable("mco.upload.size.failure.line2", SizeUnit.humanReadableSize(m, lv6), SizeUnit.humanReadableSize(5368709120L, lv6)));
          } catch (IOException var21) {
             this.setStatusTexts(Text.translatable("mco.upload.failed", var21.getMessage()));
             return;

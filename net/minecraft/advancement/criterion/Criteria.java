@@ -31,7 +31,7 @@ public class Criteria {
    public static final ChangedDimensionCriterion CHANGED_DIMENSION = (ChangedDimensionCriterion)register(new ChangedDimensionCriterion());
    public static final TickCriterion TICK = (TickCriterion)register(new TickCriterion(new Identifier("tick")));
    public static final TameAnimalCriterion TAME_ANIMAL = (TameAnimalCriterion)register(new TameAnimalCriterion());
-   public static final PlacedBlockCriterion PLACED_BLOCK = (PlacedBlockCriterion)register(new PlacedBlockCriterion());
+   public static final ItemCriterion PLACED_BLOCK = (ItemCriterion)register(new ItemCriterion(new Identifier("placed_block")));
    public static final ConsumeItemCriterion CONSUME_ITEM = (ConsumeItemCriterion)register(new ConsumeItemCriterion());
    public static final EffectsChangedCriterion EFFECTS_CHANGED = (EffectsChangedCriterion)register(new EffectsChangedCriterion());
    public static final UsedTotemCriterion USED_TOTEM = (UsedTotemCriterion)register(new UsedTotemCriterion());

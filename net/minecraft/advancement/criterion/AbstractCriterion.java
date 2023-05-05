@@ -12,6 +12,7 @@ import java.util.function.Predicate;
 import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
+import net.minecraft.predicate.entity.EntityConditions;
 import net.minecraft.predicate.entity.EntityPredicate;
 import net.minecraft.server.network.ServerPlayerEntity;
 
@@ -39,10 +40,10 @@ public abstract class AbstractCriterion implements Criterion {
       this.progressions.remove(tracker);
    }
 
-   protected abstract AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityPredicate.Extended playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer);
+   protected abstract AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityConditions playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer);
 
    public final AbstractCriterionConditions conditionsFromJson(JsonObject jsonObject, AdvancementEntityPredicateDeserializer arg) {
-      EntityPredicate.Extended lv = EntityPredicate.Extended.getInJson(jsonObject, "player", arg);
+      EntityConditions lv = EntityPredicate.toConditions(jsonObject, "player", arg);
       return this.conditionsFromJson(jsonObject, lv, arg);
    }
 

@@ -38,14 +38,16 @@ public class Advancement {
    private final String[][] requirements;
    private final Set children = Sets.newLinkedHashSet();
    private final Text text;
+   private final boolean inTelemetry;
 
-   public Advancement(Identifier id, @Nullable Advancement parent, @Nullable AdvancementDisplay display, AdvancementRewards rewards, Map criteria, String[][] requirements) {
+   public Advancement(Identifier id, @Nullable Advancement parent, @Nullable AdvancementDisplay display, AdvancementRewards rewards, Map criteria, String[][] requirements, boolean inTelemetry) {
       this.id = id;
       this.display = display;
       this.criteria = ImmutableMap.copyOf(criteria);
       this.parent = parent;
       this.rewards = rewards;
       this.requirements = requirements;
+      this.inTelemetry = inTelemetry;
       if (parent != null) {
          parent.addChild(this);
       }
@@ -65,7 +67,7 @@ public class Advancement {
    }
 
    public Builder createTask() {
-      return new Builder(this.parent == null ? null : this.parent.getId(), this.display, this.rewards, this.criteria, this.requirements);
+      return new Builder(this.parent == null ? null : this.parent.getId(), this.display, this.rewards, this.criteria, this.requirements, this.inTelemetry);
    }
 
    @Nullable
@@ -95,13 +97,17 @@ public class Advancement {
       return this.display;
    }
 
+   public boolean isInTelemetry() {
+      return this.inTelemetry;
+   }
+
    public AdvancementRewards getRewards() {
       return this.rewards;
    }
 
    public String toString() {
       Identifier var10000 = this.getId();
-      return "SimpleAdvancement{id=" + var10000 + ", parent=" + (this.parent == null ? "null" : this.parent.getId()) + ", display=" + this.display + ", rewards=" + this.rewards + ", criteria=" + this.criteria + ", requirements=" + Arrays.deepToString(this.requirements) + "}";
+      return "SimpleAdvancement{id=" + var10000 + ", parent=" + (this.parent == null ? "null" : this.parent.getId()) + ", display=" + this.display + ", rewards=" + this.rewards + ", criteria=" + this.criteria + ", requirements=" + Arrays.deepToString(this.requirements) + ", sendsTelemetryEvent=" + this.inTelemetry + "}";
    }
 
    public Iterable getChildren() {
@@ -159,8 +165,9 @@ public class Advancement {
       @Nullable
       private String[][] requirements;
       private CriterionMerger merger;
+      private final boolean inTelemetry;
 
-      Builder(@Nullable Identifier parentId, @Nullable AdvancementDisplay display, AdvancementRewards rewards, Map criteria, String[][] requirements) {
+      Builder(@Nullable Identifier parentId, @Nullable AdvancementDisplay display, AdvancementRewards rewards, Map criteria, String[][] requirements, boolean inTelemetry) {
          this.rewards = AdvancementRewards.NONE;
          this.criteria = Maps.newLinkedHashMap();
          this.merger = CriterionMerger.AND;
@@ -169,16 +176,22 @@ public class Advancement {
          this.rewards = rewards;
          this.criteria = criteria;
          this.requirements = requirements;
+         this.inTelemetry = inTelemetry;
       }
 
-      private Builder() {
+      private Builder(boolean inTelemetry) {
          this.rewards = AdvancementRewards.NONE;
          this.criteria = Maps.newLinkedHashMap();
          this.merger = CriterionMerger.AND;
+         this.inTelemetry = inTelemetry;
       }
 
       public static Builder create() {
-         return new Builder();
+         return new Builder(true);
+      }
+
+      public static Builder createNonTelemetry() {
+         return new Builder(false);
       }
 
       public Builder parent(Advancement parent) {
@@ -258,7 +271,7 @@ public class Advancement {
                this.requirements = this.merger.createRequirements(this.criteria.keySet());
             }
 
-            return new Advancement(id, this.parentObj, this.display, this.rewards, this.criteria, this.requirements);
+            return new Advancement(id, this.parentObj, this.display, this.rewards, this.criteria, this.requirements, this.inTelemetry);
          }
       }
 
@@ -313,6 +326,7 @@ public class Advancement {
          }
 
          jsonObject.add("requirements", jsonArray);
+         jsonObject.addProperty("sends_telemetry_event", this.inTelemetry);
          return jsonObject;
       }
 
@@ -342,11 +356,12 @@ public class Advancement {
             }
          }
 
+         buf.writeBoolean(this.inTelemetry);
       }
 
       public String toString() {
          Identifier var10000 = this.parentId;
-         return "Task Advancement{parentId=" + var10000 + ", display=" + this.display + ", rewards=" + this.rewards + ", criteria=" + this.criteria + ", requirements=" + Arrays.deepToString(this.requirements) + "}";
+         return "Task Advancement{parentId=" + var10000 + ", display=" + this.display + ", rewards=" + this.rewards + ", criteria=" + this.criteria + ", requirements=" + Arrays.deepToString(this.requirements) + ", sends_telemetry_event=" + this.inTelemetry + "}";
       }
 
       public static Builder fromJson(JsonObject obj, AdvancementEntityPredicateDeserializer predicateDeserializer) {
@@ -408,16 +423,17 @@ public class Advancement {
             boolean bl;
             do {
                if (!var19.hasNext()) {
-                  return new Builder(lv, lv2, lv3, map, strings);
+                  boolean bl2 = JsonHelper.getBoolean(obj, "sends_telemetry_event", false);
+                  return new Builder(lv, lv2, lv3, map, strings, bl2);
                }
 
                string3 = (String)var19.next();
                bl = false;
-               String[][] var22 = strings;
-               int var24 = strings.length;
+               String[][] var23 = strings;
+               int var25 = strings.length;
 
-               for(var13 = 0; var13 < var24; ++var13) {
-                  String[] strings3 = var22[var13];
+               for(var13 = 0; var13 < var25; ++var13) {
+                  String[] strings3 = var23[var13];
                   if (ArrayUtils.contains(strings3, string3)) {
                      bl = true;
                      break;
@@ -443,7 +459,8 @@ public class Advancement {
             }
          }
 
-         return new Builder(lv, lv2, AdvancementRewards.NONE, map, strings);
+         boolean bl = buf.readBoolean();
+         return new Builder(lv, lv2, AdvancementRewards.NONE, map, strings, bl);
       }
 
       public Map getCriteria() {

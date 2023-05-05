@@ -13,7 +13,7 @@ import net.minecraft.predicate.NbtPredicate;
 import net.minecraft.predicate.NumberRange;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateSerializer;
-import net.minecraft.predicate.entity.EntityPredicate;
+import net.minecraft.predicate.entity.EntityConditions;
 import net.minecraft.predicate.item.EnchantmentPredicate;
 import net.minecraft.predicate.item.ItemPredicate;
 import net.minecraft.registry.tag.TagKey;
@@ -28,7 +28,7 @@ public class InventoryChangedCriterion extends AbstractCriterion {
       return ID;
    }
 
-   public Conditions conditionsFromJson(JsonObject jsonObject, EntityPredicate.Extended arg, AdvancementEntityPredicateDeserializer arg2) {
+   public Conditions conditionsFromJson(JsonObject jsonObject, EntityConditions arg, AdvancementEntityPredicateDeserializer arg2) {
       JsonObject jsonObject2 = JsonHelper.getObject(jsonObject, "slots", new JsonObject());
       NumberRange.IntRange lv = NumberRange.IntRange.fromJson(jsonObject2.get("occupied"));
       NumberRange.IntRange lv2 = NumberRange.IntRange.fromJson(jsonObject2.get("full"));
@@ -64,7 +64,7 @@ public class InventoryChangedCriterion extends AbstractCriterion {
    }
 
    // $FF: synthetic method
-   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityPredicate.Extended playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityConditions playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
       return this.conditionsFromJson(obj, playerPredicate, predicateDeserializer);
    }
 
@@ -74,7 +74,7 @@ public class InventoryChangedCriterion extends AbstractCriterion {
       private final NumberRange.IntRange empty;
       private final ItemPredicate[] items;
 
-      public Conditions(EntityPredicate.Extended player, NumberRange.IntRange occupied, NumberRange.IntRange full, NumberRange.IntRange empty, ItemPredicate[] items) {
+      public Conditions(EntityConditions player, NumberRange.IntRange occupied, NumberRange.IntRange full, NumberRange.IntRange empty, ItemPredicate[] items) {
          super(InventoryChangedCriterion.ID, player);
          this.occupied = occupied;
          this.full = full;
@@ -83,7 +83,7 @@ public class InventoryChangedCriterion extends AbstractCriterion {
       }
 
       public static Conditions items(ItemPredicate... items) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, NumberRange.IntRange.ANY, NumberRange.IntRange.ANY, NumberRange.IntRange.ANY, items);
+         return new Conditions(EntityConditions.EMPTY, NumberRange.IntRange.ANY, NumberRange.IntRange.ANY, NumberRange.IntRange.ANY, items);
       }
 
       public static Conditions items(ItemConvertible... items) {

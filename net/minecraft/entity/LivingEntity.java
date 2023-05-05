@@ -294,13 +294,23 @@ public abstract class LivingEntity extends Entity implements Attackable {
          this.addSoulSpeedBoostIfNeeded();
       }
 
-      if (!this.getWorld().isClient && this.fallDistance > 3.0F && onGround) {
-         float f = (float)MathHelper.ceil(this.fallDistance - 3.0F);
-         if (!state.isAir()) {
-            double e = Math.min((double)(0.2F + f / 15.0F), 2.5);
-            int i = (int)(150.0 * e);
-            ((ServerWorld)this.getWorld()).spawnParticles(new BlockStateParticleEffect(ParticleTypes.BLOCK, state), this.getX(), this.getY(), this.getZ(), i, 0.0, 0.0, 0.0, 0.15000000596046448);
+      if (!this.getWorld().isClient && this.fallDistance > 3.0F && onGround && !state.isAir()) {
+         double e = this.getX();
+         double f = this.getY();
+         double g = this.getZ();
+         BlockPos lv = this.getBlockPos();
+         if (landedPosition.getX() != lv.getX() || landedPosition.getZ() != lv.getZ()) {
+            double h = e - (double)landedPosition.getX() - 0.5;
+            double i = g - (double)landedPosition.getZ() - 0.5;
+            double j = Math.max(Math.abs(h), Math.abs(i));
+            e = (double)landedPosition.getX() + 0.5 + h / j * 0.5;
+            g = (double)landedPosition.getZ() + 0.5 + i / j * 0.5;
          }
+
+         float k = (float)MathHelper.ceil(this.fallDistance - 3.0F);
+         double l = Math.min((double)(0.2F + k / 15.0F), 2.5);
+         int m = (int)(150.0 * l);
+         ((ServerWorld)this.getWorld()).spawnParticles(new BlockStateParticleEffect(ParticleTypes.BLOCK, state), e, f, g, m, 0.0, 0.0, 0.0, 0.15000000596046448);
       }
 
       super.fall(heightDifference, onGround, state, landedPosition);
@@ -1937,17 +1947,17 @@ public abstract class LivingEntity extends Entity implements Attackable {
    }
 
    protected float getJumpVelocity() {
-      return 0.42F * this.getJumpVelocityMultiplier();
+      float f = 0.42F * this.getJumpVelocityMultiplier();
+      return f + this.getJumpBoostVelocityModifier();
    }
 
-   public double getJumpBoostVelocityModifier() {
-      return this.hasStatusEffect(StatusEffects.JUMP_BOOST) ? (double)(0.1F * (float)(this.getStatusEffect(StatusEffects.JUMP_BOOST).getAmplifier() + 1)) : 0.0;
+   public float getJumpBoostVelocityModifier() {
+      return this.hasStatusEffect(StatusEffects.JUMP_BOOST) ? 0.1F * (float)(this.getStatusEffect(StatusEffects.JUMP_BOOST).getAmplifier() + 1) : 0.0F;
    }
 
    protected void jump() {
-      double d = (double)this.getJumpVelocity() + this.getJumpBoostVelocityModifier();
       Vec3d lv = this.getVelocity();
-      this.setVelocity(lv.x, d, lv.z);
+      this.setVelocity(lv.x, (double)this.getJumpVelocity(), lv.z);
       if (this.isSprinting()) {
          float f = this.getYaw() * 0.017453292F;
          this.setVelocity(this.getVelocity().add((double)(-MathHelper.sin(f) * 0.2F), 0.0, (double)(MathHelper.cos(f) * 0.2F)));

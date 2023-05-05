@@ -1282,8 +1282,8 @@ public class ServerWorld extends World implements StructureWorldAccess {
          if (writer != null) {
             try {
                writer.close();
-            } catch (Throwable var14) {
-               var22.addSuppressed(var14);
+            } catch (Throwable var12) {
+               var22.addSuppressed(var12);
             }
          }
 
@@ -1300,16 +1300,16 @@ public class ServerWorld extends World implements StructureWorldAccess {
 
       try {
          writer2.write(lv3.asString());
-      } catch (Throwable var17) {
+      } catch (Throwable var19) {
          if (writer2 != null) {
             try {
                writer2.close();
-            } catch (Throwable var16) {
-               var17.addSuppressed(var16);
+            } catch (Throwable var11) {
+               var19.addSuppressed(var11);
             }
          }
 
-         throw var17;
+         throw var19;
       }
 
       if (writer2 != null) {
@@ -1321,16 +1321,16 @@ public class ServerWorld extends World implements StructureWorldAccess {
 
       try {
          lv.dump(writer3);
-      } catch (Throwable var20) {
+      } catch (Throwable var18) {
          if (writer3 != null) {
             try {
                writer3.close();
-            } catch (Throwable var15) {
-               var20.addSuppressed(var15);
+            } catch (Throwable var13) {
+               var18.addSuppressed(var13);
             }
          }
 
-         throw var20;
+         throw var18;
       }
 
       if (writer3 != null) {
@@ -1342,16 +1342,16 @@ public class ServerWorld extends World implements StructureWorldAccess {
 
       try {
          this.entityManager.dump(writer4);
-      } catch (Throwable var18) {
+      } catch (Throwable var21) {
          if (writer4 != null) {
             try {
                writer4.close();
-            } catch (Throwable var13) {
-               var18.addSuppressed(var13);
+            } catch (Throwable var15) {
+               var21.addSuppressed(var15);
             }
          }
 
-         throw var18;
+         throw var21;
       }
 
       if (writer4 != null) {
@@ -1363,16 +1363,16 @@ public class ServerWorld extends World implements StructureWorldAccess {
 
       try {
          dumpEntities(writer5, this.getEntityLookup().iterate());
-      } catch (Throwable var21) {
+      } catch (Throwable var20) {
          if (writer5 != null) {
             try {
                writer5.close();
-            } catch (Throwable var12) {
-               var21.addSuppressed(var12);
+            } catch (Throwable var14) {
+               var20.addSuppressed(var14);
             }
          }
 
-         throw var21;
+         throw var20;
       }
 
       if (writer5 != null) {
@@ -1384,16 +1384,16 @@ public class ServerWorld extends World implements StructureWorldAccess {
 
       try {
          this.dumpBlockEntities(writer6);
-      } catch (Throwable var19) {
+      } catch (Throwable var17) {
          if (writer6 != null) {
             try {
                writer6.close();
-            } catch (Throwable var11) {
-               var19.addSuppressed(var11);
+            } catch (Throwable var16) {
+               var17.addSuppressed(var16);
             }
          }
 
-         throw var19;
+         throw var17;
       }
 
       if (writer6 != null) {

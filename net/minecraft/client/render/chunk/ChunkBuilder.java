@@ -294,7 +294,7 @@ public class ChunkBuilder {
          this.buffers = (Map)RenderLayer.getBlockLayers().stream().collect(Collectors.toMap((argx) -> {
             return argx;
          }, (argx) -> {
-            return new VertexBuffer();
+            return new VertexBuffer(VertexBuffer.class_8555.STATIC);
          }));
          this.needsRebuild = true;
          this.origin = new BlockPos.Mutable(-1, -1, -1);

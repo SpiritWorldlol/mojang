@@ -1,50 +1,33 @@
 package net.minecraft.client.font;
 
-import com.google.common.collect.Maps;
-import com.google.gson.JsonObject;
-import java.util.Map;
-import java.util.function.Function;
+import com.mojang.serialization.MapCodec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.Util;
+import net.minecraft.util.StringIdentifiable;
 
 @Environment(EnvType.CLIENT)
-public enum FontType {
-   BITMAP("bitmap", BitmapFont.Loader::fromJson),
-   TTF("ttf", TrueTypeFontLoader::fromJson),
-   SPACE("space", SpaceFont::fromJson),
-   UNIHEX("unihex", UnihexFont.Loader::fromJson),
-   REFERENCE("reference", ReferenceFont::fromJson);
+public enum FontType implements StringIdentifiable {
+   BITMAP("bitmap", BitmapFont.Loader.CODEC),
+   TTF("ttf", TrueTypeFontLoader.CODEC),
+   SPACE("space", SpaceFont.Loader.CODEC),
+   UNIHEX("unihex", UnihexFont.Loader.CODEC),
+   REFERENCE("reference", ReferenceFont.CODEC);
 
-   private static final Map REGISTRY = (Map)Util.make(Maps.newHashMap(), (map) -> {
-      FontType[] var1 = values();
-      int var2 = var1.length;
-
-      for(int var3 = 0; var3 < var2; ++var3) {
-         FontType lv = var1[var3];
-         map.put(lv.id, lv);
-      }
-
-   });
+   public static final com.mojang.serialization.Codec CODEC = StringIdentifiable.createCodec(FontType::values);
    private final String id;
-   private final Function loaderFactory;
+   private final MapCodec codec;
 
-   private FontType(String id, Function factory) {
+   private FontType(String id, MapCodec codec) {
       this.id = id;
-      this.loaderFactory = factory;
+      this.codec = codec;
    }
 
-   public static FontType byId(String id) {
-      FontType lv = (FontType)REGISTRY.get(id);
-      if (lv == null) {
-         throw new IllegalArgumentException("Invalid type: " + id);
-      } else {
-         return lv;
-      }
+   public String asString() {
+      return this.id;
    }
 
-   public FontLoader createLoader(JsonObject json) {
-      return (FontLoader)this.loaderFactory.apply(json);
+   public MapCodec getLoaderCodec() {
+      return this.codec;
    }
 
    // $FF: synthetic method

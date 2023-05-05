@@ -46,12 +46,12 @@ public class SmithingScreenHandler extends ForgingScreenHandler {
             return recipe.testTemplate(stack);
          });
       }).input(1, 26, 48, (stack) -> {
-         return this.recipes.stream().anyMatch((recipe) -> {
-            return recipe.testBase(stack) && recipe.testTemplate(((Slot)this.slots.get(0)).getStack());
+         return this.recipes.stream().anyMatch((arg2) -> {
+            return arg2.testBase(stack);
          });
       }).input(2, 44, 48, (stack) -> {
-         return this.recipes.stream().anyMatch((recipe) -> {
-            return recipe.testAddition(stack) && recipe.testTemplate(((Slot)this.slots.get(0)).getStack());
+         return this.recipes.stream().anyMatch((arg2) -> {
+            return arg2.testAddition(stack);
          });
       }).output(3, 98, 48).build();
    }

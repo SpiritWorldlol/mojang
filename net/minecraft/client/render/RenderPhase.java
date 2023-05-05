@@ -66,8 +66,6 @@ public abstract class RenderPhase {
       RenderSystem.defaultBlendFunc();
    });
    protected static final ShaderProgram NO_PROGRAM = new ShaderProgram();
-   protected static final ShaderProgram BLOCK_PROGRAM = new ShaderProgram(GameRenderer::getBlockProgram);
-   protected static final ShaderProgram NEW_ENTITY_PROGRAM = new ShaderProgram(GameRenderer::getNewEntityProgram);
    protected static final ShaderProgram POSITION_COLOR_LIGHTMAP_PROGRAM = new ShaderProgram(GameRenderer::getPositionColorLightmapProgram);
    protected static final ShaderProgram POSITION_PROGRAM = new ShaderProgram(GameRenderer::getPositionProgram);
    protected static final ShaderProgram POSITION_COLOR_TEXTURE_PROGRAM = new ShaderProgram(GameRenderer::getPositionColorTexProgram);
@@ -119,6 +117,10 @@ public abstract class RenderPhase {
    protected static final ShaderProgram END_PORTAL_PROGRAM = new ShaderProgram(GameRenderer::getRenderTypeEndPortalProgram);
    protected static final ShaderProgram END_GATEWAY_PROGRAM = new ShaderProgram(GameRenderer::getRenderTypeEndGatewayProgram);
    protected static final ShaderProgram LINES_PROGRAM = new ShaderProgram(GameRenderer::getRenderTypeLinesProgram);
+   protected static final ShaderProgram field_44817 = new ShaderProgram(GameRenderer::method_51771);
+   protected static final ShaderProgram field_44818 = new ShaderProgram(GameRenderer::method_51772);
+   protected static final ShaderProgram field_44819 = new ShaderProgram(GameRenderer::method_51773);
+   protected static final ShaderProgram field_44820 = new ShaderProgram(GameRenderer::method_51774);
    protected static final Texture MIPMAP_BLOCK_ATLAS_TEXTURE;
    protected static final Texture BLOCK_ATLAS_TEXTURE;
    protected static final TextureBase NO_TEXTURE;
@@ -134,6 +136,7 @@ public abstract class RenderPhase {
    protected static final DepthTest ALWAYS_DEPTH_TEST;
    protected static final DepthTest EQUAL_DEPTH_TEST;
    protected static final DepthTest LEQUAL_DEPTH_TEST;
+   protected static final DepthTest field_44814;
    protected static final WriteMaskState ALL_MASK;
    protected static final WriteMaskState COLOR_MASK;
    protected static final WriteMaskState DEPTH_MASK;
@@ -148,6 +151,8 @@ public abstract class RenderPhase {
    protected static final Target CLOUDS_TARGET;
    protected static final Target ITEM_TARGET;
    protected static final LineWidth FULL_LINE_WIDTH;
+   protected static final class_8559 field_44815;
+   protected static final class_8559 field_44816;
 
    public RenderPhase(String name, Runnable beginAction, Runnable endAction) {
       this.name = name;
@@ -202,6 +207,7 @@ public abstract class RenderPhase {
       ALWAYS_DEPTH_TEST = new DepthTest("always", 519);
       EQUAL_DEPTH_TEST = new DepthTest("==", 514);
       LEQUAL_DEPTH_TEST = new DepthTest("<=", 515);
+      field_44814 = new DepthTest(">", 516);
       ALL_MASK = new WriteMaskState(true, true);
       COLOR_MASK = new WriteMaskState(true, false);
       DEPTH_MASK = new WriteMaskState(false, true);
@@ -289,6 +295,16 @@ public abstract class RenderPhase {
 
       });
       FULL_LINE_WIDTH = new LineWidth(OptionalDouble.of(1.0));
+      field_44815 = new class_8559("no_color_logic", () -> {
+         RenderSystem.disableColorLogicOp();
+      }, () -> {
+      });
+      field_44816 = new class_8559("or_reverse", () -> {
+         RenderSystem.enableColorLogicOp();
+         RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
+      }, () -> {
+         RenderSystem.disableColorLogicOp();
+      });
    }
 
    @Environment(EnvType.CLIENT)
@@ -527,6 +543,13 @@ public abstract class RenderPhase {
       public String toString() {
          String var10000 = this.name;
          return var10000 + "[" + (this.width.isPresent() ? this.width.getAsDouble() : "window_scale") + "]";
+      }
+   }
+
+   @Environment(EnvType.CLIENT)
+   protected static class class_8559 extends RenderPhase {
+      public class_8559(String string, Runnable runnable, Runnable runnable2) {
+         super(string, runnable, runnable2);
       }
    }
 

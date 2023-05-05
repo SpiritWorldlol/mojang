@@ -6,6 +6,7 @@ import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateSerializer;
+import net.minecraft.predicate.entity.EntityConditions;
 import net.minecraft.predicate.entity.EntityPredicate;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -18,10 +19,10 @@ public class BredAnimalsCriterion extends AbstractCriterion {
       return ID;
    }
 
-   public Conditions conditionsFromJson(JsonObject jsonObject, EntityPredicate.Extended arg, AdvancementEntityPredicateDeserializer arg2) {
-      EntityPredicate.Extended lv = EntityPredicate.Extended.getInJson(jsonObject, "parent", arg2);
-      EntityPredicate.Extended lv2 = EntityPredicate.Extended.getInJson(jsonObject, "partner", arg2);
-      EntityPredicate.Extended lv3 = EntityPredicate.Extended.getInJson(jsonObject, "child", arg2);
+   public Conditions conditionsFromJson(JsonObject jsonObject, EntityConditions arg, AdvancementEntityPredicateDeserializer arg2) {
+      EntityConditions lv = EntityPredicate.toConditions(jsonObject, "parent", arg2);
+      EntityConditions lv2 = EntityPredicate.toConditions(jsonObject, "partner", arg2);
+      EntityConditions lv3 = EntityPredicate.toConditions(jsonObject, "child", arg2);
       return new Conditions(arg, lv, lv2, lv3);
    }
 
@@ -35,16 +36,16 @@ public class BredAnimalsCriterion extends AbstractCriterion {
    }
 
    // $FF: synthetic method
-   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityPredicate.Extended playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityConditions playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
       return this.conditionsFromJson(obj, playerPredicate, predicateDeserializer);
    }
 
    public static class Conditions extends AbstractCriterionConditions {
-      private final EntityPredicate.Extended parent;
-      private final EntityPredicate.Extended partner;
-      private final EntityPredicate.Extended child;
+      private final EntityConditions parent;
+      private final EntityConditions partner;
+      private final EntityConditions child;
 
-      public Conditions(EntityPredicate.Extended player, EntityPredicate.Extended parent, EntityPredicate.Extended partner, EntityPredicate.Extended child) {
+      public Conditions(EntityConditions player, EntityConditions parent, EntityConditions partner, EntityConditions child) {
          super(BredAnimalsCriterion.ID, player);
          this.parent = parent;
          this.partner = partner;
@@ -52,19 +53,19 @@ public class BredAnimalsCriterion extends AbstractCriterion {
       }
 
       public static Conditions any() {
-         return new Conditions(EntityPredicate.Extended.EMPTY, EntityPredicate.Extended.EMPTY, EntityPredicate.Extended.EMPTY, EntityPredicate.Extended.EMPTY);
+         return new Conditions(EntityConditions.EMPTY, EntityConditions.EMPTY, EntityConditions.EMPTY, EntityConditions.EMPTY);
       }
 
       public static Conditions create(EntityPredicate.Builder child) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, EntityPredicate.Extended.EMPTY, EntityPredicate.Extended.EMPTY, EntityPredicate.Extended.ofLegacy(child.build()));
+         return new Conditions(EntityConditions.EMPTY, EntityConditions.EMPTY, EntityConditions.EMPTY, EntityPredicate.toConditions(child.build()));
       }
 
       public static Conditions create(EntityPredicate parent, EntityPredicate partner, EntityPredicate child) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, EntityPredicate.Extended.ofLegacy(parent), EntityPredicate.Extended.ofLegacy(partner), EntityPredicate.Extended.ofLegacy(child));
+         return new Conditions(EntityConditions.EMPTY, EntityPredicate.toConditions(parent), EntityPredicate.toConditions(partner), EntityPredicate.toConditions(child));
       }
 
       public boolean matches(LootContext parentContext, LootContext partnerContext, @Nullable LootContext childContext) {
-         if (this.child == EntityPredicate.Extended.EMPTY || childContext != null && this.child.test(childContext)) {
+         if (this.child == EntityConditions.EMPTY || childContext != null && this.child.test(childContext)) {
             return this.parent.test(parentContext) && this.partner.test(partnerContext) || this.parent.test(partnerContext) && this.partner.test(parentContext);
          } else {
             return false;

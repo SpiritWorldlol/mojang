@@ -558,7 +558,7 @@ public class BlockPos extends Vec3i {
 
    static {
       CODEC = Codec.INT_STREAM.comapFlatMap((stream) -> {
-         return Util.toArray((IntStream)stream, 3).map((values) -> {
+         return Util.decodeFixedLengthArray(stream, 3).map((values) -> {
             return new BlockPos(values[0], values[1], values[2]);
          });
       }, (pos) -> {

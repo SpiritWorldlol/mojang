@@ -555,7 +555,7 @@ public class WorldRenderer implements SynchronousResourceReloader, AutoCloseable
          this.darkSkyBuffer.close();
       }
 
-      this.darkSkyBuffer = new VertexBuffer();
+      this.darkSkyBuffer = new VertexBuffer(VertexBuffer.class_8555.STATIC);
       BufferBuilder.BuiltBuffer lv3 = renderSky(lv2, -16.0F);
       this.darkSkyBuffer.bind();
       this.darkSkyBuffer.upload(lv3);
@@ -569,7 +569,7 @@ public class WorldRenderer implements SynchronousResourceReloader, AutoCloseable
          this.lightSkyBuffer.close();
       }
 
-      this.lightSkyBuffer = new VertexBuffer();
+      this.lightSkyBuffer = new VertexBuffer(VertexBuffer.class_8555.STATIC);
       BufferBuilder.BuiltBuffer lv3 = renderSky(lv2, 16.0F);
       this.lightSkyBuffer.bind();
       this.lightSkyBuffer.upload(lv3);
@@ -598,7 +598,7 @@ public class WorldRenderer implements SynchronousResourceReloader, AutoCloseable
          this.starsBuffer.close();
       }
 
-      this.starsBuffer = new VertexBuffer();
+      this.starsBuffer = new VertexBuffer(VertexBuffer.class_8555.STATIC);
       BufferBuilder.BuiltBuffer lv3 = this.renderStars(lv2);
       this.starsBuffer.bind();
       this.starsBuffer.upload(lv3);
@@ -1086,7 +1086,7 @@ public class WorldRenderer implements SynchronousResourceReloader, AutoCloseable
       BlockPos lv = chunk.getOrigin();
       int k = ChunkSectionPos.getSectionCoord(lv.getX());
       int l = ChunkSectionPos.getSectionCoord(lv.getZ());
-      return !ThreadedAnvilChunkStorage.isWithinDistance(k, l, i, j, this.viewDistance - 2);
+      return !ThreadedAnvilChunkStorage.isWithinDistance(k, l, i, j, this.viewDistance - 3);
    }
 
    private void captureFrustum(Matrix4f positionMatrix, Matrix4f matrix4f2, double x, double y, double z, Frustum frustum) {
@@ -1969,7 +1969,7 @@ public class WorldRenderer implements SynchronousResourceReloader, AutoCloseable
                this.cloudsBuffer.close();
             }
 
-            this.cloudsBuffer = new VertexBuffer();
+            this.cloudsBuffer = new VertexBuffer(VertexBuffer.class_8555.STATIC);
             BufferBuilder.BuiltBuffer lv3 = this.renderClouds(lv2, m, n, o, lv);
             this.cloudsBuffer.bind();
             this.cloudsBuffer.upload(lv3);
@@ -2275,20 +2275,60 @@ public class WorldRenderer implements SynchronousResourceReloader, AutoCloseable
       drawCuboidShapeOutline(matrices, vertexConsumer, state.getOutlineShape(this.world, pos, ShapeContext.of(entity)), (double)pos.getX() - cameraX, (double)pos.getY() - cameraY, (double)pos.getZ() - cameraZ, 0.0F, 0.0F, 0.0F, 0.4F);
    }
 
-   public static void drawShapeOutline(MatrixStack matrices, VertexConsumer vertexConsumer, VoxelShape shape, double offsetX, double offsetY, double offsetZ, float red, float green, float blue, float alpha) {
-      List list = shape.getBoundingBoxes();
-      int k = MathHelper.ceil((double)list.size() / 3.0);
-
-      for(int l = 0; l < list.size(); ++l) {
-         Box lv = (Box)list.get(l);
-         float m = ((float)l % (float)k + 1.0F) / (float)k;
-         float n = (float)(l / k);
-         float o = m * (float)(n == 0.0F ? 1 : 0);
-         float p = m * (float)(n == 1.0F ? 1 : 0);
-         float q = m * (float)(n == 2.0F ? 1 : 0);
-         drawCuboidShapeOutline(matrices, vertexConsumer, VoxelShapes.cuboid(lv.offset(0.0, 0.0, 0.0)), offsetX, offsetY, offsetZ, o, p, q, 1.0F);
+   private static Vec3d method_51778(float f) {
+      float g = 5.99999F;
+      int i = (int)(MathHelper.clamp(f, 0.0F, 1.0F) * 5.99999F);
+      float h = f * 5.99999F - (float)i;
+      Vec3d var10000;
+      switch (i) {
+         case 0:
+            var10000 = new Vec3d(1.0, (double)h, 0.0);
+            break;
+         case 1:
+            var10000 = new Vec3d((double)(1.0F - h), 1.0, 0.0);
+            break;
+         case 2:
+            var10000 = new Vec3d(0.0, 1.0, (double)h);
+            break;
+         case 3:
+            var10000 = new Vec3d(0.0, 1.0 - (double)h, 1.0);
+            break;
+         case 4:
+            var10000 = new Vec3d((double)h, 0.0, 1.0);
+            break;
+         case 5:
+            var10000 = new Vec3d(1.0, 0.0, 1.0 - (double)h);
+            break;
+         default:
+            throw new IllegalStateException("Unexpected value: " + i);
       }
 
+      return var10000;
+   }
+
+   private static Vec3d method_51779(float f, float g, float h, float i) {
+      Vec3d lv = method_51778(i).multiply((double)f);
+      Vec3d lv2 = method_51778((i + 0.33333334F) % 1.0F).multiply((double)g);
+      Vec3d lv3 = method_51778((i + 0.6666667F) % 1.0F).multiply((double)h);
+      Vec3d lv4 = lv.add(lv2).add(lv3);
+      double d = Math.max(Math.max(1.0, lv4.x), Math.max(lv4.y, lv4.z));
+      return new Vec3d(lv4.x / d, lv4.y / d, lv4.z / d);
+   }
+
+   public static void drawShapeOutline(MatrixStack matrices, VertexConsumer vertexConsumer, VoxelShape shape, double offsetX, double offsetY, double offsetZ, float red, float green, float blue, float alpha, boolean bl) {
+      List list = shape.getBoundingBoxes();
+      if (!list.isEmpty()) {
+         int k = bl ? list.size() : list.size() * 8;
+         drawCuboidShapeOutline(matrices, vertexConsumer, VoxelShapes.cuboid((Box)list.get(0)), offsetX, offsetY, offsetZ, red, green, blue, alpha);
+
+         for(int l = 1; l < list.size(); ++l) {
+            Box lv = (Box)list.get(l);
+            float m = (float)l / (float)k;
+            Vec3d lv2 = method_51779(red, green, blue, m);
+            drawCuboidShapeOutline(matrices, vertexConsumer, VoxelShapes.cuboid(lv), offsetX, offsetY, offsetZ, (float)lv2.x, (float)lv2.y, (float)lv2.z, alpha);
+         }
+
+      }
    }
 
    private static void drawCuboidShapeOutline(MatrixStack matrices, VertexConsumer vertexConsumer, VoxelShape shape, double offsetX, double offsetY, double offsetZ, float red, float green, float blue, float alpha) {

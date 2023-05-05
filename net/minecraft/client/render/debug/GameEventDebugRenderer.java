@@ -59,7 +59,7 @@ public class GameEventDebugRenderer implements DebugRenderer.Renderer {
                double j = pos.getX() + (double)lv4.getRange();
                double k = pos.getY() + (double)lv4.getRange();
                double l = pos.getZ() + (double)lv4.getRange();
-               WorldRenderer.drawShapeOutline(matrices, lv3, VoxelShapes.cuboid(new Box(g, h, i, j, k, l)), -cameraX, -cameraY, -cameraZ, 1.0F, 1.0F, 0.0F, 0.35F);
+               WorldRenderer.drawShapeOutline(matrices, lv3, VoxelShapes.cuboid(new Box(g, h, i, j, k, l)), -cameraX, -cameraY, -cameraZ, 1.0F, 1.0F, 0.0F, 0.35F, true);
             });
          }
 

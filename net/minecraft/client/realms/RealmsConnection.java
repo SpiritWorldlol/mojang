@@ -47,6 +47,7 @@ public class RealmsConnection {
          public void run() {
             InetSocketAddress inetSocketAddress = null;
 
+            String stringx;
             try {
                inetSocketAddress = new InetSocketAddress(string, i);
                if (RealmsConnection.this.aborted) {
@@ -58,8 +59,13 @@ public class RealmsConnection {
                   return;
                }
 
-               RealmsConnection.this.connection.setPacketListener(new ClientLoginNetworkHandler(RealmsConnection.this.connection, lv, server.createServerInfo(string), RealmsConnection.this.onlineScreen, false, (Duration)null, (status) -> {
-               }));
+               ClientLoginNetworkHandler lvx = new ClientLoginNetworkHandler(RealmsConnection.this.connection, lv, server.createServerInfo(string), RealmsConnection.this.onlineScreen, false, (Duration)null, (status) -> {
+               });
+               if (server.worldType == RealmsServer.WorldType.MINIGAME) {
+                  lvx.setRealmsMinigameName(server.minigameName);
+               }
+
+               RealmsConnection.this.connection.setPacketListener(lvx);
                if (RealmsConnection.this.aborted) {
                   return;
                }
@@ -69,7 +75,7 @@ public class RealmsConnection {
                   return;
                }
 
-               String stringx = lv.getSession().getUsername();
+               stringx = lv.getSession().getUsername();
                UUID uUID = lv.getSession().getUuidOrNull();
                RealmsConnection.this.connection.send(new LoginHelloC2SPacket(stringx, Optional.ofNullable(uUID)));
                lv.ensureAbuseReportContext(ReporterEnvironment.ofRealm(server));
@@ -81,15 +87,15 @@ public class RealmsConnection {
                }
 
                RealmsConnection.LOGGER.error("Couldn't connect to world", var5);
-               String string2 = var5.toString();
+               stringx = var5.toString();
                if (inetSocketAddress != null) {
-                  String string3 = "" + inetSocketAddress + ":" + i;
-                  string2 = string2.replaceAll(string3, "");
+                  String string2 = "" + inetSocketAddress + ":" + i;
+                  stringx = stringx.replaceAll(string2, "");
                }
 
-               DisconnectedRealmsScreen lvx = new DisconnectedRealmsScreen(RealmsConnection.this.onlineScreen, ScreenTexts.CONNECT_FAILED, Text.translatable("disconnect.genericReason", string2));
+               DisconnectedRealmsScreen lv2 = new DisconnectedRealmsScreen(RealmsConnection.this.onlineScreen, ScreenTexts.CONNECT_FAILED, Text.translatable("disconnect.genericReason", stringx));
                lv.execute(() -> {
-                  lv.setScreen(lvx);
+                  lv.setScreen(lv2);
                });
             }
 

@@ -787,7 +787,7 @@ public abstract class AbstractHorseEntity extends AnimalEntity implements Invent
 
    protected void jump(float strength, Vec3d movementInput) {
       double d = this.getJumpStrength() * (double)strength * (double)this.getJumpVelocityMultiplier();
-      double e = d + this.getJumpBoostVelocityModifier();
+      double e = d + (double)this.getJumpBoostVelocityModifier();
       Vec3d lv = this.getVelocity();
       this.setVelocity(lv.x, e, lv.z);
       this.setInAir(true);

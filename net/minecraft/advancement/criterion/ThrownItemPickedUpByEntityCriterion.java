@@ -6,6 +6,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateSerializer;
+import net.minecraft.predicate.entity.EntityConditions;
 import net.minecraft.predicate.entity.EntityPredicate;
 import net.minecraft.predicate.item.ItemPredicate;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -23,9 +24,9 @@ public class ThrownItemPickedUpByEntityCriterion extends AbstractCriterion {
       return this.id;
    }
 
-   protected Conditions conditionsFromJson(JsonObject jsonObject, EntityPredicate.Extended arg, AdvancementEntityPredicateDeserializer arg2) {
+   protected Conditions conditionsFromJson(JsonObject jsonObject, EntityConditions arg, AdvancementEntityPredicateDeserializer arg2) {
       ItemPredicate lv = ItemPredicate.fromJson(jsonObject.get("item"));
-      EntityPredicate.Extended lv2 = EntityPredicate.Extended.getInJson(jsonObject, "entity", arg2);
+      EntityConditions lv2 = EntityPredicate.toConditions(jsonObject, "entity", arg2);
       return new Conditions(this.id, arg, lv, lv2);
    }
 
@@ -37,25 +38,25 @@ public class ThrownItemPickedUpByEntityCriterion extends AbstractCriterion {
    }
 
    // $FF: synthetic method
-   protected AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityPredicate.Extended playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+   protected AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityConditions playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
       return this.conditionsFromJson(obj, playerPredicate, predicateDeserializer);
    }
 
    public static class Conditions extends AbstractCriterionConditions {
       private final ItemPredicate item;
-      private final EntityPredicate.Extended entity;
+      private final EntityConditions entity;
 
-      public Conditions(Identifier id, EntityPredicate.Extended player, ItemPredicate item, EntityPredicate.Extended entity) {
+      public Conditions(Identifier id, EntityConditions player, ItemPredicate item, EntityConditions entity) {
          super(id, player);
          this.item = item;
          this.entity = entity;
       }
 
-      public static Conditions createThrownItemPickedUpByEntity(EntityPredicate.Extended player, ItemPredicate item, EntityPredicate.Extended entity) {
+      public static Conditions createThrownItemPickedUpByEntity(EntityConditions player, ItemPredicate item, EntityConditions entity) {
          return new Conditions(Criteria.THROWN_ITEM_PICKED_UP_BY_ENTITY.getId(), player, item, entity);
       }
 
-      public static Conditions createThrownItemPickedUpByPlayer(EntityPredicate.Extended player, ItemPredicate item, EntityPredicate.Extended entity) {
+      public static Conditions createThrownItemPickedUpByPlayer(EntityConditions player, ItemPredicate item, EntityConditions entity) {
          return new Conditions(Criteria.THROWN_ITEM_PICKED_UP_BY_PLAYER.getId(), player, item, entity);
       }
 

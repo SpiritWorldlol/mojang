@@ -12,7 +12,6 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.UUID;
-import java.util.stream.IntStream;
 
 public final class Uuids {
    public static final Codec INT_STREAM_CODEC;
@@ -68,7 +67,7 @@ public final class Uuids {
 
    static {
       INT_STREAM_CODEC = Codec.INT_STREAM.comapFlatMap((uuidStream) -> {
-         return Util.toArray((IntStream)uuidStream, 4).map(Uuids::toUuid);
+         return Util.decodeFixedLengthArray(uuidStream, 4).map(Uuids::toUuid);
       }, (uuid) -> {
          return Arrays.stream(toIntArray(uuid));
       });

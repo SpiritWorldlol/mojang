@@ -84,11 +84,11 @@ public class BiomeColorCache {
 
       Colors lv;
       Colors lv2;
-      label126: {
+      label125: {
          try {
             lv = (Colors)this.colors.get(l);
             if (lv == null) {
-               break label126;
+               break label125;
             }
 
             lv2 = lv;
@@ -101,26 +101,25 @@ public class BiomeColorCache {
 
       this.lock.writeLock().lock();
 
-      Colors var7;
       try {
          lv = (Colors)this.colors.get(l);
-         if (lv != null) {
-            lv2 = lv;
-            return lv2;
+         if (lv == null) {
+            lv2 = new Colors();
+            if (this.colors.size() >= 256) {
+               this.colors.removeFirst();
+            }
+
+            this.colors.put(l, lv2);
+            Colors var7 = lv2;
+            return var7;
          }
 
-         lv2 = new Colors();
-         if (this.colors.size() >= 256) {
-            this.colors.removeFirst();
-         }
-
-         this.colors.put(l, lv2);
-         var7 = lv2;
+         lv2 = lv;
       } finally {
          this.lock.writeLock().unlock();
       }
 
-      return var7;
+      return lv2;
    }
 
    @Environment(EnvType.CLIENT)

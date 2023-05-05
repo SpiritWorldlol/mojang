@@ -4,13 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import java.util.function.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.loot.condition.EntityPropertiesLootCondition;
 import net.minecraft.loot.condition.LootCondition;
-import net.minecraft.loot.condition.LootConditionTypes;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.loot.context.LootContextParameters;
 import net.minecraft.loot.context.LootContextTypes;
@@ -70,6 +68,46 @@ public class EntityPredicate {
       this.passenger = passenger;
       this.targetedEntity = targetedEntity;
       this.team = team;
+   }
+
+   public static EntityConditions toConditions(JsonObject obj, String key, AdvancementEntityPredicateDeserializer deserializer) {
+      JsonElement jsonElement = obj.get(key);
+      return asConditions(key, deserializer, jsonElement);
+   }
+
+   public static EntityConditions[] toConditonsArray(JsonObject obj, String key, AdvancementEntityPredicateDeserializer deserializer) {
+      JsonElement jsonElement = obj.get(key);
+      if (jsonElement != null && !jsonElement.isJsonNull()) {
+         JsonArray jsonArray = JsonHelper.asArray(jsonElement, key);
+         EntityConditions[] lvs = new EntityConditions[jsonArray.size()];
+
+         for(int i = 0; i < jsonArray.size(); ++i) {
+            lvs[i] = asConditions(key + "[" + i + "]", deserializer, jsonArray.get(i));
+         }
+
+         return lvs;
+      } else {
+         return new EntityConditions[0];
+      }
+   }
+
+   private static EntityConditions asConditions(String key, AdvancementEntityPredicateDeserializer deserializer, @Nullable JsonElement json) {
+      EntityConditions lv = EntityConditions.fromJson(key, deserializer, json, LootContextTypes.ADVANCEMENT_ENTITY);
+      if (lv != null) {
+         return lv;
+      } else {
+         EntityPredicate lv2 = fromJson(json);
+         return toConditions(lv2);
+      }
+   }
+
+   public static EntityConditions toConditions(EntityPredicate predicate) {
+      if (predicate == ANY) {
+         return EntityConditions.EMPTY;
+      } else {
+         LootCondition lv = EntityPropertiesLootCondition.builder(LootContext.EntityTarget.THIS, predicate).build();
+         return new EntityConditions(new LootCondition[]{lv});
+      }
    }
 
    public boolean test(ServerPlayerEntity player, @Nullable Entity entity) {
@@ -298,86 +336,6 @@ public class EntityPredicate {
 
       public EntityPredicate build() {
          return new EntityPredicate(this.type, this.distance, this.location, this.steppingOn, this.effects, this.nbt, this.flags, this.equipment, this.typeSpecific, this.vehicle, this.passenger, this.targetedEntity, this.team);
-      }
-   }
-
-   public static class Extended {
-      public static final Extended EMPTY = new Extended(new LootCondition[0]);
-      private final LootCondition[] conditions;
-      private final Predicate combinedCondition;
-
-      private Extended(LootCondition[] conditions) {
-         this.conditions = conditions;
-         this.combinedCondition = LootConditionTypes.joinAnd(conditions);
-      }
-
-      public static Extended create(LootCondition... conditions) {
-         return new Extended(conditions);
-      }
-
-      public static Extended getInJson(JsonObject root, String key, AdvancementEntityPredicateDeserializer predicateDeserializer) {
-         JsonElement jsonElement = root.get(key);
-         return fromJson(key, predicateDeserializer, jsonElement);
-      }
-
-      public static Extended[] requireInJson(JsonObject root, String key, AdvancementEntityPredicateDeserializer predicateDeserializer) {
-         JsonElement jsonElement = root.get(key);
-         if (jsonElement != null && !jsonElement.isJsonNull()) {
-            JsonArray jsonArray = JsonHelper.asArray(jsonElement, key);
-            Extended[] lvs = new Extended[jsonArray.size()];
-
-            for(int i = 0; i < jsonArray.size(); ++i) {
-               lvs[i] = fromJson(key + "[" + i + "]", predicateDeserializer, jsonArray.get(i));
-            }
-
-            return lvs;
-         } else {
-            return new Extended[0];
-         }
-      }
-
-      private static Extended fromJson(String key, AdvancementEntityPredicateDeserializer predicateDeserializer, @Nullable JsonElement json) {
-         if (json != null && json.isJsonArray()) {
-            LootCondition[] lvs = predicateDeserializer.loadConditions(json.getAsJsonArray(), predicateDeserializer.getAdvancementId() + "/" + key, LootContextTypes.ADVANCEMENT_ENTITY);
-            return new Extended(lvs);
-         } else {
-            EntityPredicate lv = EntityPredicate.fromJson(json);
-            return ofLegacy(lv);
-         }
-      }
-
-      public static Extended ofLegacy(EntityPredicate predicate) {
-         if (predicate == EntityPredicate.ANY) {
-            return EMPTY;
-         } else {
-            LootCondition lv = EntityPropertiesLootCondition.builder(LootContext.EntityTarget.THIS, predicate).build();
-            return new Extended(new LootCondition[]{lv});
-         }
-      }
-
-      public boolean test(LootContext context) {
-         return this.combinedCondition.test(context);
-      }
-
-      public JsonElement toJson(AdvancementEntityPredicateSerializer predicateSerializer) {
-         return (JsonElement)(this.conditions.length == 0 ? JsonNull.INSTANCE : predicateSerializer.conditionsToJson(this.conditions));
-      }
-
-      public static JsonElement toPredicatesJsonArray(Extended[] predicates, AdvancementEntityPredicateSerializer predicateSerializer) {
-         if (predicates.length == 0) {
-            return JsonNull.INSTANCE;
-         } else {
-            JsonArray jsonArray = new JsonArray();
-            Extended[] var3 = predicates;
-            int var4 = predicates.length;
-
-            for(int var5 = 0; var5 < var4; ++var5) {
-               Extended lv = var3[var5];
-               jsonArray.add(lv.toJson(predicateSerializer));
-            }
-
-            return jsonArray;
-         }
       }
    }
 }

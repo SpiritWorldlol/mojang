@@ -61,7 +61,7 @@ public class ChatHud {
             boolean bl = this.isChatFocused();
             float f = (float)this.getChatScale();
             int n = MathHelper.ceil((float)this.getWidth() / f);
-            int o = this.client.getWindow().getScaledHeight();
+            int o = context.getScaledWindowHeight();
             context.getMatrices().push();
             context.getMatrices().scale(f, f, 1.0F);
             context.getMatrices().translate(4.0F, 0.0F, 0.0F);

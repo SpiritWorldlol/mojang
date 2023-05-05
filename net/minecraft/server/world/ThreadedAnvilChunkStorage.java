@@ -230,22 +230,15 @@ public class ThreadedAnvilChunkStorage extends VersionedChunkStorage implements 
       long p = (long)Math.max(0, Math.max(n, o) - 1);
       long q = (long)Math.min(n, o);
       long r = q * q + p * p;
-      int s = distance - 1;
-      int t = s * s;
-      return r <= (long)t;
+      int s = distance * distance;
+      return r < (long)s;
    }
 
    private static boolean isOnDistanceEdge(int x1, int z1, int x2, int z2, int distance) {
       if (!isWithinDistance(x1, z1, x2, z2, distance)) {
          return false;
-      } else if (!isWithinDistance(x1 + 1, z1, x2, z2, distance)) {
-         return true;
-      } else if (!isWithinDistance(x1, z1 + 1, x2, z2, distance)) {
-         return true;
-      } else if (!isWithinDistance(x1 - 1, z1, x2, z2, distance)) {
-         return true;
       } else {
-         return !isWithinDistance(x1, z1 - 1, x2, z2, distance);
+         return !isWithinDistance(x1 + 1, z1 + 1, x2, z2, distance) || !isWithinDistance(x1 - 1, z1 + 1, x2, z2, distance) || !isWithinDistance(x1 + 1, z1 - 1, x2, z2, distance) || !isWithinDistance(x1 - 1, z1 - 1, x2, z2, distance);
       }
    }
 
@@ -886,11 +879,11 @@ public class ThreadedAnvilChunkStorage extends VersionedChunkStorage implements 
    }
 
    protected void setViewDistance(int watchDistance) {
-      int j = MathHelper.clamp(watchDistance + 1, 3, 33);
+      int j = MathHelper.clamp(watchDistance, 2, 32);
       if (j != this.watchDistance) {
          int k = this.watchDistance;
          this.watchDistance = j;
-         this.ticketManager.setWatchDistance(this.watchDistance + 1);
+         this.ticketManager.setWatchDistance(this.watchDistance + 2);
          ObjectIterator var4 = this.currentChunkHolders.values().iterator();
 
          while(var4.hasNext()) {
@@ -1126,40 +1119,41 @@ public class ThreadedAnvilChunkStorage extends VersionedChunkStorage implements 
 
       int k = lv2.getSectionX();
       int n = lv2.getSectionZ();
-      int o;
+      int o = this.watchDistance + 1;
       int p;
-      if (Math.abs(k - i) <= this.watchDistance * 2 && Math.abs(n - j) <= this.watchDistance * 2) {
-         o = Math.min(i, k) - this.watchDistance - 1;
-         p = Math.min(j, n) - this.watchDistance - 1;
-         int q = Math.max(i, k) + this.watchDistance + 1;
-         int r = Math.max(j, n) + this.watchDistance + 1;
+      int q;
+      if (Math.abs(k - i) <= o * 2 && Math.abs(n - j) <= o * 2) {
+         p = Math.min(i, k) - o;
+         q = Math.min(j, n) - o;
+         int r = Math.max(i, k) + o;
+         int s = Math.max(j, n) + o;
 
-         for(int s = o; s <= q; ++s) {
-            for(int t = p; t <= r; ++t) {
-               boolean bl4 = isWithinDistance(s, t, k, n, this.watchDistance);
-               boolean bl5 = isWithinDistance(s, t, i, j, this.watchDistance);
-               this.sendWatchPackets(player, new ChunkPos(s, t), new MutableObject(), bl4, bl5);
+         for(int t = p; t <= r; ++t) {
+            for(int u = q; u <= s; ++u) {
+               boolean bl4 = isWithinDistance(t, u, k, n, this.watchDistance);
+               boolean bl5 = isWithinDistance(t, u, i, j, this.watchDistance);
+               this.sendWatchPackets(player, new ChunkPos(t, u), new MutableObject(), bl4, bl5);
             }
          }
       } else {
          boolean bl6;
          boolean bl7;
-         for(o = k - this.watchDistance - 1; o <= k + this.watchDistance + 1; ++o) {
-            for(p = n - this.watchDistance - 1; p <= n + this.watchDistance + 1; ++p) {
-               if (isWithinDistance(o, p, k, n, this.watchDistance)) {
+         for(p = k - o; p <= k + o; ++p) {
+            for(q = n - o; q <= n + o; ++q) {
+               if (isWithinDistance(p, q, k, n, this.watchDistance)) {
                   bl6 = true;
                   bl7 = false;
-                  this.sendWatchPackets(player, new ChunkPos(o, p), new MutableObject(), true, false);
+                  this.sendWatchPackets(player, new ChunkPos(p, q), new MutableObject(), true, false);
                }
             }
          }
 
-         for(o = i - this.watchDistance - 1; o <= i + this.watchDistance + 1; ++o) {
-            for(p = j - this.watchDistance - 1; p <= j + this.watchDistance + 1; ++p) {
-               if (isWithinDistance(o, p, i, j, this.watchDistance)) {
+         for(p = i - o; p <= i + o; ++p) {
+            for(q = j - o; q <= j + o; ++q) {
+               if (isWithinDistance(p, q, i, j, this.watchDistance)) {
                   bl6 = false;
                   bl7 = true;
-                  this.sendWatchPackets(player, new ChunkPos(o, p), new MutableObject(), false, true);
+                  this.sendWatchPackets(player, new ChunkPos(p, q), new MutableObject(), false, true);
                }
             }
          }
@@ -1462,7 +1456,7 @@ public class ThreadedAnvilChunkStorage extends VersionedChunkStorage implements 
       public void updateTrackedStatus(ServerPlayerEntity player) {
          if (player != this.entity) {
             Vec3d lv = player.getPos().subtract(this.entity.getPos());
-            double d = (double)Math.min(this.getMaxTrackDistance(), (ThreadedAnvilChunkStorage.this.watchDistance - 1) * 16);
+            double d = (double)Math.min(this.getMaxTrackDistance(), ThreadedAnvilChunkStorage.this.watchDistance * 16);
             double e = lv.x * lv.x + lv.z * lv.z;
             double f = d * d;
             boolean bl = e <= f && this.entity.canBeSpectated(player);

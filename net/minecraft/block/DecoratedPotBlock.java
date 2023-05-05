@@ -107,7 +107,7 @@ public class DecoratedPotBlock extends BlockWithEntity implements Waterloggable 
    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List tooltip, TooltipContext options) {
       super.appendTooltip(stack, world, tooltip, options);
       DecoratedPotBlockEntity.Sherds lv = DecoratedPotBlockEntity.Sherds.fromNbt(BlockItem.getBlockEntityNbt(stack));
-      if (lv != DecoratedPotBlockEntity.Sherds.DEFAULT) {
+      if (!lv.equals(DecoratedPotBlockEntity.Sherds.DEFAULT)) {
          tooltip.add(ScreenTexts.EMPTY);
          Stream.of(lv.front(), lv.left(), lv.right(), lv.back()).forEach((sherd) -> {
             tooltip.add((new ItemStack(sherd, 1)).getName().copyContentOnly().formatted(Formatting.GRAY));

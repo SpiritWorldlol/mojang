@@ -31,7 +31,7 @@ public class BossBarHud {
 
    public void render(DrawContext context) {
       if (!this.bossBars.isEmpty()) {
-         int i = this.client.getWindow().getScaledWidth();
+         int i = context.getScaledWindowWidth();
          int j = 12;
          Iterator var4 = this.bossBars.values().iterator();
 
@@ -46,7 +46,7 @@ public class BossBarHud {
             context.drawTextWithShadow(this.client.textRenderer, lv2, n, o, 16777215);
             Objects.requireNonNull(this.client.textRenderer);
             j += 10 + 9;
-            if (j >= this.client.getWindow().getScaledHeight() / 3) {
+            if (j >= context.getScaledWindowHeight() / 3) {
                break;
             }
          }

@@ -6,6 +6,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateSerializer;
+import net.minecraft.predicate.entity.EntityConditions;
 import net.minecraft.predicate.entity.EntityPredicate;
 import net.minecraft.predicate.item.ItemPredicate;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -18,9 +19,9 @@ public class PlayerInteractedWithEntityCriterion extends AbstractCriterion {
       return ID;
    }
 
-   protected Conditions conditionsFromJson(JsonObject jsonObject, EntityPredicate.Extended arg, AdvancementEntityPredicateDeserializer arg2) {
+   protected Conditions conditionsFromJson(JsonObject jsonObject, EntityConditions arg, AdvancementEntityPredicateDeserializer arg2) {
       ItemPredicate lv = ItemPredicate.fromJson(jsonObject.get("item"));
-      EntityPredicate.Extended lv2 = EntityPredicate.Extended.getInJson(jsonObject, "entity", arg2);
+      EntityConditions lv2 = EntityPredicate.toConditions(jsonObject, "entity", arg2);
       return new Conditions(arg, lv, lv2);
    }
 
@@ -32,26 +33,26 @@ public class PlayerInteractedWithEntityCriterion extends AbstractCriterion {
    }
 
    // $FF: synthetic method
-   protected AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityPredicate.Extended playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+   protected AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityConditions playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
       return this.conditionsFromJson(obj, playerPredicate, predicateDeserializer);
    }
 
    public static class Conditions extends AbstractCriterionConditions {
       private final ItemPredicate item;
-      private final EntityPredicate.Extended entity;
+      private final EntityConditions entity;
 
-      public Conditions(EntityPredicate.Extended player, ItemPredicate item, EntityPredicate.Extended entity) {
+      public Conditions(EntityConditions player, ItemPredicate item, EntityConditions entity) {
          super(PlayerInteractedWithEntityCriterion.ID, player);
          this.item = item;
          this.entity = entity;
       }
 
-      public static Conditions create(EntityPredicate.Extended player, ItemPredicate.Builder itemBuilder, EntityPredicate.Extended entity) {
+      public static Conditions create(EntityConditions player, ItemPredicate.Builder itemBuilder, EntityConditions entity) {
          return new Conditions(player, itemBuilder.build(), entity);
       }
 
-      public static Conditions create(ItemPredicate.Builder itemBuilder, EntityPredicate.Extended entity) {
-         return create(EntityPredicate.Extended.EMPTY, itemBuilder, entity);
+      public static Conditions create(ItemPredicate.Builder itemBuilder, EntityConditions entity) {
+         return create(EntityConditions.EMPTY, itemBuilder, entity);
       }
 
       public boolean test(ItemStack stack, LootContext context) {

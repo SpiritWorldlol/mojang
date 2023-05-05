@@ -84,7 +84,7 @@ public class Codecs {
 
    public static Codec createCodecForPairObject(Codec codec, String leftFieldName, String rightFieldName, BiFunction combineFunction, Function leftFunction, Function rightFunction) {
       Codec codec2 = Codec.list(codec).comapFlatMap((list) -> {
-         return Util.toArray((List)list, 2).flatMap((listx) -> {
+         return Util.decodeFixedLengthList(list, 2).flatMap((listx) -> {
             Object object = listx.get(0);
             Object object2 = listx.get(1);
             return (DataResult)combineFunction.apply(object, object2);
@@ -204,6 +204,10 @@ public class Codecs {
    }
 
    public static Codec validate(Codec codec, Function validator) {
+      return codec.flatXmap(validator, validator);
+   }
+
+   public static MapCodec validateMap(MapCodec codec, Function validator) {
       return codec.flatXmap(validator, validator);
    }
 
@@ -389,14 +393,14 @@ public class Codecs {
          }
       });
       VECTOR_3F = Codec.FLOAT.listOf().comapFlatMap((list) -> {
-         return Util.toArray((List)list, 3).map((listx) -> {
+         return Util.decodeFixedLengthList(list, 3).map((listx) -> {
             return new Vector3f((Float)listx.get(0), (Float)listx.get(1), (Float)listx.get(2));
          });
       }, (vec3f) -> {
          return List.of(vec3f.x(), vec3f.y(), vec3f.z());
       });
       QUATERNIONF = Codec.FLOAT.listOf().comapFlatMap((list) -> {
-         return Util.toArray((List)list, 4).map((listx) -> {
+         return Util.decodeFixedLengthList(list, 4).map((listx) -> {
             return new Quaternionf((Float)listx.get(0), (Float)listx.get(1), (Float)listx.get(2), (Float)listx.get(3));
          });
       }, (quaternion) -> {
@@ -417,7 +421,7 @@ public class Codecs {
          });
       }, com.mojang.datafixers.util.Either::left);
       MATRIX4F = Codec.FLOAT.listOf().comapFlatMap((list) -> {
-         return Util.toArray((List)list, 16).map((listx) -> {
+         return Util.decodeFixedLengthList(list, 16).map((listx) -> {
             Matrix4f matrix4f = new Matrix4f();
 
             for(int i = 0; i < listx.size(); ++i) {

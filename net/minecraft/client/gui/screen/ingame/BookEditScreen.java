@@ -1,8 +1,6 @@
 package net.minecraft.client.gui.screen.ingame;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.Arrays;
@@ -21,6 +19,7 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.PageTurnWidget;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.client.util.SelectionManager;
 import net.minecraft.client.util.math.Rect2i;
@@ -453,8 +452,6 @@ public class BookEditScreen extends Screen {
    }
 
    private void drawSelection(DrawContext context, Rect2i[] selectionRectangles) {
-      RenderSystem.enableColorLogicOp();
-      RenderSystem.logicOp(GlStateManager.LogicOp.OR_REVERSE);
       Rect2i[] var3 = selectionRectangles;
       int var4 = selectionRectangles.length;
 
@@ -464,10 +461,9 @@ public class BookEditScreen extends Screen {
          int j = lv.getY();
          int k = i + lv.getWidth();
          int l = j + lv.getHeight();
-         context.fill(i, j, k, l, -16776961);
+         context.method_51739(RenderLayer.method_51786(), i, j, k, l, -16776961);
       }
 
-      RenderSystem.disableColorLogicOp();
    }
 
    private Position screenPositionToAbsolutePosition(Position position) {

@@ -9,6 +9,7 @@ import net.minecraft.entity.LightningEntity;
 import net.minecraft.loot.context.LootContext;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateSerializer;
+import net.minecraft.predicate.entity.EntityConditions;
 import net.minecraft.predicate.entity.EntityPredicate;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -20,9 +21,9 @@ public class LightningStrikeCriterion extends AbstractCriterion {
       return ID;
    }
 
-   public Conditions conditionsFromJson(JsonObject jsonObject, EntityPredicate.Extended arg, AdvancementEntityPredicateDeserializer arg2) {
-      EntityPredicate.Extended lv = EntityPredicate.Extended.getInJson(jsonObject, "lightning", arg2);
-      EntityPredicate.Extended lv2 = EntityPredicate.Extended.getInJson(jsonObject, "bystander", arg2);
+   public Conditions conditionsFromJson(JsonObject jsonObject, EntityConditions arg, AdvancementEntityPredicateDeserializer arg2) {
+      EntityConditions lv = EntityPredicate.toConditions(jsonObject, "lightning", arg2);
+      EntityConditions lv2 = EntityPredicate.toConditions(jsonObject, "bystander", arg2);
       return new Conditions(arg, lv, lv2);
    }
 
@@ -37,31 +38,31 @@ public class LightningStrikeCriterion extends AbstractCriterion {
    }
 
    // $FF: synthetic method
-   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityPredicate.Extended playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityConditions playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
       return this.conditionsFromJson(obj, playerPredicate, predicateDeserializer);
    }
 
    public static class Conditions extends AbstractCriterionConditions {
-      private final EntityPredicate.Extended lightning;
-      private final EntityPredicate.Extended bystander;
+      private final EntityConditions lightning;
+      private final EntityConditions bystander;
 
-      public Conditions(EntityPredicate.Extended player, EntityPredicate.Extended lightning, EntityPredicate.Extended bystander) {
+      public Conditions(EntityConditions player, EntityConditions lightning, EntityConditions bystander) {
          super(LightningStrikeCriterion.ID, player);
          this.lightning = lightning;
          this.bystander = bystander;
       }
 
       public static Conditions create(EntityPredicate lightning, EntityPredicate bystander) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, EntityPredicate.Extended.ofLegacy(lightning), EntityPredicate.Extended.ofLegacy(bystander));
+         return new Conditions(EntityConditions.EMPTY, EntityPredicate.toConditions(lightning), EntityPredicate.toConditions(bystander));
       }
 
       public boolean test(LootContext lightning, List bystanders) {
          if (!this.lightning.test(lightning)) {
             return false;
          } else {
-            if (this.bystander != EntityPredicate.Extended.EMPTY) {
+            if (this.bystander != EntityConditions.EMPTY) {
                Stream var10000 = bystanders.stream();
-               EntityPredicate.Extended var10001 = this.bystander;
+               EntityConditions var10001 = this.bystander;
                Objects.requireNonNull(var10001);
                if (var10000.noneMatch(var10001::test)) {
                   return false;

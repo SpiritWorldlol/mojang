@@ -5,7 +5,7 @@ import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateSerializer;
-import net.minecraft.predicate.entity.EntityPredicate;
+import net.minecraft.predicate.entity.EntityConditions;
 import net.minecraft.predicate.item.ItemPredicate;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -17,7 +17,7 @@ public class UsedTotemCriterion extends AbstractCriterion {
       return ID;
    }
 
-   public Conditions conditionsFromJson(JsonObject jsonObject, EntityPredicate.Extended arg, AdvancementEntityPredicateDeserializer arg2) {
+   public Conditions conditionsFromJson(JsonObject jsonObject, EntityConditions arg, AdvancementEntityPredicateDeserializer arg2) {
       ItemPredicate lv = ItemPredicate.fromJson(jsonObject.get("item"));
       return new Conditions(arg, lv);
    }
@@ -29,24 +29,24 @@ public class UsedTotemCriterion extends AbstractCriterion {
    }
 
    // $FF: synthetic method
-   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityPredicate.Extended playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+   public AbstractCriterionConditions conditionsFromJson(JsonObject obj, EntityConditions playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
       return this.conditionsFromJson(obj, playerPredicate, predicateDeserializer);
    }
 
    public static class Conditions extends AbstractCriterionConditions {
       private final ItemPredicate item;
 
-      public Conditions(EntityPredicate.Extended player, ItemPredicate item) {
+      public Conditions(EntityConditions player, ItemPredicate item) {
          super(UsedTotemCriterion.ID, player);
          this.item = item;
       }
 
       public static Conditions create(ItemPredicate itemPredicate) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, itemPredicate);
+         return new Conditions(EntityConditions.EMPTY, itemPredicate);
       }
 
       public static Conditions create(ItemConvertible item) {
-         return new Conditions(EntityPredicate.Extended.EMPTY, ItemPredicate.Builder.create().items(item).build());
+         return new Conditions(EntityConditions.EMPTY, ItemPredicate.Builder.create().items(item).build());
       }
 
       public boolean matches(ItemStack stack) {

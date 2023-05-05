@@ -124,7 +124,7 @@ public abstract class LightStorage {
       return this.hasLightUpdates;
    }
 
-   protected void updateLight(ChunkLightProvider lightProvider) {
+   protected void updateLight(ChunkLightProvider arg) {
       if (this.hasLightUpdates) {
          this.hasLightUpdates = false;
          LongIterator var2 = this.sectionsToRemove.iterator();
@@ -162,7 +162,6 @@ public abstract class LightStorage {
             if (this.hasSection(m)) {
                lv2 = (ChunkNibbleArray)entry.getValue();
                if (this.storage.get(m) != lv2) {
-                  lightProvider.markSectionAsChecked(m);
                   this.storage.put(m, lv2);
                   this.dirtySections.add(m);
                }

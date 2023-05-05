@@ -53,7 +53,7 @@ public class DesertPyramidStructure extends BasicTempleStructure {
          if (i > 0) {
             --i;
             placeSuspiciousSand(box, world, lv4);
-         } else {
+         } else if (box.contains(lv4)) {
             world.setBlockState(lv4, Blocks.SAND.getDefaultState(), Block.NOTIFY_LISTENERS);
          }
       }

@@ -623,7 +623,7 @@ public class Util {
       };
    }
 
-   public static DataResult toArray(IntStream stream, int length) {
+   public static DataResult decodeFixedLengthArray(IntStream stream, int length) {
       int[] is = stream.limit((long)(length + 1)).toArray();
       if (is.length != length) {
          Supplier supplier = () -> {
@@ -635,7 +635,7 @@ public class Util {
       }
    }
 
-   public static DataResult toArray(List list, int length) {
+   public static DataResult decodeFixedLengthList(List list, int length) {
       if (list.size() != length) {
          Supplier supplier = () -> {
             return "Input is not a list of " + length + " elements";

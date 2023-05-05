@@ -57,7 +57,7 @@ public record ReporterEnvironment(String clientVersion, @Nullable Server server)
 
    private static String getVersion() {
       StringBuilder stringBuilder = new StringBuilder();
-      stringBuilder.append("23w17a");
+      stringBuilder.append("23w18a");
       if (MinecraftClient.getModStatus().isModded()) {
          stringBuilder.append(" (modded)");
       }

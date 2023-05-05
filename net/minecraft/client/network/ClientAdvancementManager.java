@@ -11,6 +11,7 @@ import net.minecraft.advancement.AdvancementManager;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.toast.AdvancementToast;
+import net.minecraft.client.util.telemetry.WorldSession;
 import net.minecraft.network.packet.c2s.play.AdvancementTabC2SPacket;
 import net.minecraft.network.packet.s2c.play.AdvancementUpdateS2CPacket;
 import net.minecraft.util.Identifier;
@@ -21,6 +22,7 @@ import org.slf4j.Logger;
 public class ClientAdvancementManager {
    private static final Logger LOGGER = LogUtils.getLogger();
    private final MinecraftClient client;
+   private final WorldSession field_44808;
    private final AdvancementManager manager = new AdvancementManager();
    private final Map advancementProgresses = Maps.newHashMap();
    @Nullable
@@ -28,8 +30,9 @@ public class ClientAdvancementManager {
    @Nullable
    private Advancement selectedTab;
 
-   public ClientAdvancementManager(MinecraftClient client) {
+   public ClientAdvancementManager(MinecraftClient client, WorldSession arg2) {
       this.client = client;
+      this.field_44808 = arg2;
    }
 
    public void onAdvancements(AdvancementUpdateS2CPacket packet) {
@@ -53,8 +56,14 @@ public class ClientAdvancementManager {
                this.listener.setProgress(lv, lv2);
             }
 
-            if (!packet.shouldClearCurrent() && lv2.isDone() && lv.getDisplay() != null && lv.getDisplay().shouldShowToast()) {
-               this.client.getToastManager().add(new AdvancementToast(lv));
+            if (!packet.shouldClearCurrent() && lv2.isDone()) {
+               if (this.client.world != null) {
+                  this.field_44808.onAdvancement(this.client.world, lv);
+               }
+
+               if (lv.getDisplay() != null && lv.getDisplay().shouldShowToast()) {
+                  this.client.getToastManager().add(new AdvancementToast(lv));
+               }
             }
          } else {
             LOGGER.warn("Server informed client about progress for unknown advancement {}", entry.getKey());

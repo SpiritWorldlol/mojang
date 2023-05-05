@@ -44,13 +44,13 @@ public class RconClient extends RconBase {
             if (this.running) {
                BufferedInputStream bufferedInputStream = new BufferedInputStream(this.socket.getInputStream());
                int i = bufferedInputStream.read(this.packetBuffer, 0, 1460);
-               if (10 > i) {
-                  return;
-               }
+               if (10 <= i) {
+                  int j = 0;
+                  int k = BufferHelper.getIntLE(this.packetBuffer, 0, i);
+                  if (k != i - 4) {
+                     return;
+                  }
 
-               int j = 0;
-               int k = BufferHelper.getIntLE(this.packetBuffer, 0, i);
-               if (k == i - 4) {
                   j += 4;
                   int l = BufferHelper.getIntLE(this.packetBuffer, j, i);
                   j += 4;

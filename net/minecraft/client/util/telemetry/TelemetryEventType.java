@@ -25,6 +25,8 @@ public class TelemetryEventType {
    public static final TelemetryEventType PERFORMANCE_METRICS;
    public static final TelemetryEventType WORLD_LOAD_TIMES;
    public static final TelemetryEventType WORLD_UNLOADED;
+   public static final TelemetryEventType ADVANCEMENT_MADE;
+   public static final TelemetryEventType GAME_LOAD_TIMES;
    private final String id;
    private final String exportKey;
    private final List properties;
@@ -104,12 +106,14 @@ public class TelemetryEventType {
             return "No TelemetryEventType with key: '" + id + "'";
          });
       }, TelemetryEventType::getId);
-      BASIC_PROPERTIES = List.of(TelemetryEventProperty.USER_ID, TelemetryEventProperty.CLIENT_ID, TelemetryEventProperty.MINECRAFT_SESSION_ID, TelemetryEventProperty.GAME_VERSION, TelemetryEventProperty.OPERATING_SYSTEM, TelemetryEventProperty.PLATFORM, TelemetryEventProperty.CLIENT_MODDED, TelemetryEventProperty.EVENT_TIMESTAMP_UTC, TelemetryEventProperty.OPT_IN);
+      BASIC_PROPERTIES = List.of(TelemetryEventProperty.USER_ID, TelemetryEventProperty.CLIENT_ID, TelemetryEventProperty.MINECRAFT_SESSION_ID, TelemetryEventProperty.GAME_VERSION, TelemetryEventProperty.OPERATING_SYSTEM, TelemetryEventProperty.PLATFORM, TelemetryEventProperty.CLIENT_MODDED, TelemetryEventProperty.LAUNCHER_NAME, TelemetryEventProperty.EVENT_TIMESTAMP_UTC, TelemetryEventProperty.OPT_IN);
       REQUIRED_PROPERTIES = Stream.concat(BASIC_PROPERTIES.stream(), Stream.of(TelemetryEventProperty.WORLD_SESSION_ID, TelemetryEventProperty.SERVER_MODDED, TelemetryEventProperty.SERVER_TYPE)).toList();
-      WORLD_LOADED = builder("world_loaded", "WorldLoaded").properties(REQUIRED_PROPERTIES).properties(TelemetryEventProperty.GAME_MODE).build();
+      WORLD_LOADED = builder("world_loaded", "WorldLoaded").properties(REQUIRED_PROPERTIES).properties(TelemetryEventProperty.GAME_MODE).properties(TelemetryEventProperty.REALMS_MAP_CONTENT).build();
       PERFORMANCE_METRICS = builder("performance_metrics", "PerformanceMetrics").properties(REQUIRED_PROPERTIES).properties(TelemetryEventProperty.FRAME_RATE_SAMPLES).properties(TelemetryEventProperty.RENDER_TIME_SAMPLES).properties(TelemetryEventProperty.USED_MEMORY_SAMPLES).properties(TelemetryEventProperty.NUMBER_OF_SAMPLES).properties(TelemetryEventProperty.RENDER_DISTANCE).properties(TelemetryEventProperty.DEDICATED_MEMORY_KB).optional().build();
       WORLD_LOAD_TIMES = builder("world_load_times", "WorldLoadTimes").properties(REQUIRED_PROPERTIES).properties(TelemetryEventProperty.WORLD_LOAD_TIME_MS).properties(TelemetryEventProperty.NEW_WORLD).optional().build();
       WORLD_UNLOADED = builder("world_unloaded", "WorldUnloaded").properties(REQUIRED_PROPERTIES).properties(TelemetryEventProperty.SECONDS_SINCE_LOAD).properties(TelemetryEventProperty.TICKS_SINCE_LOAD).build();
+      ADVANCEMENT_MADE = builder("advancement_made", "AdvancementMade").properties(REQUIRED_PROPERTIES).properties(TelemetryEventProperty.ADVANCEMENT_ID).properties(TelemetryEventProperty.ADVANCEMENT_GAME_TIME).optional().build();
+      GAME_LOAD_TIMES = builder("game_load_times", "GameLoadTimes").properties(BASIC_PROPERTIES).properties(TelemetryEventProperty.LOAD_TIME_TOTAL_TIME_MS).properties(TelemetryEventProperty.LOAD_TIME_PRE_WINDOW_MS).properties(TelemetryEventProperty.LOAD_TIME_BOOTSTRAP_MS).properties(TelemetryEventProperty.LOAD_TIME_LOADING_OVERLAY_MS).optional().build();
    }
 
    @Environment(EnvType.CLIENT)

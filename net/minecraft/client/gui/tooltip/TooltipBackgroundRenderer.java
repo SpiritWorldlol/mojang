@@ -37,7 +37,7 @@ public class TooltipBackgroundRenderer {
    }
 
    private static void renderVerticalLine(DrawContext context, int x, int y, int height, int z, int color) {
-      context.fill(x, y, x + 1, y + height, z, color);
+      context.method_51737(x, y, x + 1, y + height, z, color);
    }
 
    private static void renderVerticalLine(DrawContext context, int x, int y, int height, int z, int startColor, int endColor) {
@@ -45,10 +45,10 @@ public class TooltipBackgroundRenderer {
    }
 
    private static void renderHorizontalLine(DrawContext context, int x, int y, int width, int z, int color) {
-      context.fill(x, y, x + width, y + 1, z, color);
+      context.method_51737(x, y, x + width, y + 1, z, color);
    }
 
    private static void renderRectangle(DrawContext context, int x, int y, int width, int height, int z, int color) {
-      context.fill(x, y, x + width, y + height, z, color);
+      context.method_51737(x, y, x + width, y + height, z, color);
    }
 }

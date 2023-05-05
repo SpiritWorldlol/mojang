@@ -9,7 +9,8 @@ import net.minecraft.util.JsonSerializing;
 
 public class LootConditionTypes {
    public static final LootConditionType INVERTED = register("inverted", new InvertedLootCondition.Serializer());
-   public static final LootConditionType ALTERNATIVE = register("alternative", new AlternativeLootCondition.Serializer());
+   public static final LootConditionType ANY_OF = register("any_of", new AnyOfLootCondition.Serializer());
+   public static final LootConditionType ALL_OF = register("all_of", new AllOfLootCondition.Serializer());
    public static final LootConditionType RANDOM_CHANCE = register("random_chance", new RandomChanceLootCondition.Serializer());
    public static final LootConditionType RANDOM_CHANCE_WITH_LOOTING = register("random_chance_with_looting", new RandomChanceWithLootingLootCondition.Serializer());
    public static final LootConditionType ENTITY_PROPERTIES = register("entity_properties", new EntityPropertiesLootCondition.Serializer());
@@ -34,18 +35,22 @@ public class LootConditionTypes {
       return JsonSerializing.createSerializerBuilder(Registries.LOOT_CONDITION_TYPE, "condition", "condition", LootCondition::getType).build();
    }
 
-   public static Predicate joinAnd(Predicate[] predicates) {
+   public static Predicate matchingAll(Predicate[] predicates) {
+      Predicate var10000;
       switch (predicates.length) {
          case 0:
-            return (predicatesx) -> {
+            var10000 = (predicatesx) -> {
                return true;
             };
+            break;
          case 1:
-            return predicates[0];
+            var10000 = predicates[0];
+            break;
          case 2:
-            return predicates[0].and(predicates[1]);
+            var10000 = predicates[0].and(predicates[1]);
+            break;
          default:
-            return (operand) -> {
+            var10000 = (operand) -> {
                Predicate[] var2 = predicates;
                int var3 = predicates.length;
 
@@ -59,20 +64,26 @@ public class LootConditionTypes {
                return true;
             };
       }
+
+      return var10000;
    }
 
-   public static Predicate joinOr(Predicate[] predicates) {
+   public static Predicate matchingAny(Predicate[] predicates) {
+      Predicate var10000;
       switch (predicates.length) {
          case 0:
-            return (predicatesx) -> {
+            var10000 = (predicatesx) -> {
                return false;
             };
+            break;
          case 1:
-            return predicates[0];
+            var10000 = predicates[0];
+            break;
          case 2:
-            return predicates[0].or(predicates[1]);
+            var10000 = predicates[0].or(predicates[1]);
+            break;
          default:
-            return (operand) -> {
+            var10000 = (operand) -> {
                Predicate[] var2 = predicates;
                int var3 = predicates.length;
 
@@ -86,5 +97,7 @@ public class LootConditionTypes {
                return false;
             };
       }
+
+      return var10000;
    }
 }
